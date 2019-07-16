@@ -21,6 +21,7 @@ button {
 #scores {
     position: absolute;
     left: 630px;
+    top: 0px;
 }
 
 p {
