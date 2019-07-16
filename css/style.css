@@ -1,15 +1,33 @@
+body {
+    font-size: 30px;
+}
+
 canvas {
     border: 1px solid #d3d3d3;
 }
 
 button {
-  background-color: #4CAF50; /* Green */
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  margin: 10px 0px 10px 0px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    margin: 10px 0px 10px 0px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+#scores {
+    position: absolute;
+    top: 490px;
+}
+
+p {
+    margin-top: -15px;
+}
+
+h1 {
+    font-size: 40px;
+    margin-bottom: 15px;
 }
