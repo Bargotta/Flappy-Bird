@@ -77,6 +77,7 @@ function clearScreen() {
 
 function reset() {
 	clearInterval(interval);
+	frames = 0;
 	obstacles = [];
 
 	setup();
