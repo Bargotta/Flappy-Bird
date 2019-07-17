@@ -16,9 +16,10 @@ var SPACE_BAR = 32;
 var jumpAcceleration = -23;
 var decay = 0.75;
 
-var frame = 0;
+var frame = 1;
 var obstacles = [];
 var square;
+var score = 0;
 
 window.onload = function() {
     canvas = document.getElementById('canvas');
@@ -33,6 +34,7 @@ window.onload = function() {
 function setup() {
     square = new Square(20, (canvas.height - squareSize) / 2, squareSize);
     createObstaclePair(2 * obstacleSpacing);
+    createObstaclePair(3 * obstacleSpacing);
 
     document.body.onkeydown = function(e){
         if (e.keyCode == SPACE_BAR) {
@@ -49,6 +51,7 @@ function game() {
 
     if (frame % obstacleSpacing == 0) {
         createObstaclePair(3 * obstacleSpacing);
+        score++;
     }
 
     for (var i = 0; i < obstacles.length; i++) {
@@ -77,7 +80,8 @@ function clearScreen() {
 
 function reset() {
     clearInterval(interval);
-    frame = 0;
+    frame = 1;
+    score = 0;
     obstacles = [];
 
     setup();
@@ -85,7 +89,7 @@ function reset() {
 }
 
 function getScore() {
-    return Math.round(frame / 10);
+    return Math.max(score - 1, 0);
 }
 
 function updateScore() {
