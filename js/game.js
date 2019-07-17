@@ -163,11 +163,20 @@ function Square(x, y, size) {
         this.y += this.vel * frameRate * 100;
         this.acc = Math.min(0, this.acc + decay);
         this.hitFloor();
+        this.hitCeil();
     }
 
     this.hitFloor = function() {
-        if (this.y >= canvas.height - this.size) {
-            this.y = canvas.height - this.size;
+        var floor = canvas.height - this.size
+        if (this.y >= floor) {
+            this.y = floor;
+            this.vel = 0;
+        }
+    }
+
+    this.hitCeil = function() {
+        if (this.y <= 0) {
+            this.y = 0;
             this.vel = 0;
         }
     }
