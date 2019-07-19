@@ -17,11 +17,18 @@ var floorHeight = 60;
 var obstacleSpawn = 750; // Location where obstacles are created
 var obstacleSpacing = 350; // horizontal spacing between obstacle pairs
 var maxOpeningGap = 200; // max distance between an obstacle pair
-var birdSize = { width: 51, height: 36 };
 var gravity = 9.81;
 var jumpAcceleration = -24;
 var decay = 0.75;
 
+var birdSize = { width: 51, height: 36 };
+var scoreboard = { x: -150, y: -300, width: 150, height: 180 };
+var restart = {
+    x: scoreboard.x,
+    y: scoreboard.y + (2 * scoreboard.height) + 60,
+    width: scoreboard.width,
+    height: 40
+};
 var SPACE_BAR_KEY_CODE = 32;
 
 window.onload = function() {
@@ -35,13 +42,7 @@ window.onload = function() {
 
 function setup() {
     bird = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
-
-    document.body.onkeydown = function(e){
-        if (e.keyCode == SPACE_BAR_KEY_CODE) {
-            bird.acc = jumpAcceleration;
-            if (bird.vel > 0) bird.vel = 0;
-        }
-    }
+    addEventListeners();
 }
 
 function game() {
@@ -75,7 +76,7 @@ function game() {
         clearInterval(interval);
         bestScore = Math.max(bestScore, score);
 
-        // showRestartMenu();
+        showRestartMenu();
     }
 
     // update
@@ -91,6 +92,27 @@ function game() {
 /**************************************************
  * Helper Functions
  **************************************************/
+function addEventListeners() {
+    document.body.onkeydown = function(e){
+        if (e.keyCode == SPACE_BAR_KEY_CODE) {
+            bird.acc = jumpAcceleration;
+            if (bird.vel > 0) bird.vel = 0;
+        }
+    }
+
+    // restart game once restart is clicked
+    var x = (canvas.width + restart.x) / 2;
+    var y = (canvas.height + restart.y) / 2;
+    var rect = { x: x, y: y, width: restart.width, height: restart.height };
+    canvas.addEventListener('click', function(evt) {
+        var mousePos = getMousePos(evt);
+
+        if (isInside(mousePos, rect)) {
+            reset();
+        }
+    }, false);
+}
+
 function clearScreen() {
     ctx.fillStyle="#87cefa";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -102,22 +124,48 @@ function clearScreen() {
 
     var x = (canvas.width - 120) / 2;
     var y = canvas.height - 10;
-    drawText("Press spacebar to fly", x, y, 17, 5)
+    drawText("Press spacebar to fly", "white", x, y, 17, 5)
 }
 
-function drawText(text, x, y, fontSize, lineWidth) {
+function showRestartMenu() {
+    // show scoreboard
+    var x = (canvas.width + scoreboard.x) / 2;
+    var y = (canvas.height + scoreboard.y) / 2;
+    drawBorder(x, y, scoreboard.width, scoreboard.height, 3);
+    ctx.fillStyle = '#dfc269';
+    ctx.fillRect(x, y, scoreboard.width, scoreboard.height);
+
+    // add scores to scoreboard
+    drawText("Score", "#df8b03", x + (scoreboard.width / 2) - 27, y + 35, 25, 5);
+    drawText(score, "white", x + (scoreboard.width / 2) - 5, y + 70, 25, 5);
+    drawText("Best", "#df8b03", x + (scoreboard.width / 2) - 20, y + 125, 25, 5);
+    drawText(bestScore, "white", x + (scoreboard.width / 2) - 5, y + 160, 25, 5);
+
+    // show restart button
+    var x = (canvas.width + restart.x) / 2;
+    var y = (canvas.height + restart.y) / 2;
+    drawBorder(x, y, restart.width, restart.height, 3);
+    ctx.fillStyle = '#dfc269';
+    ctx.fillRect(x, y, restart.width, restart.height);
+    drawText("Restart", "#d5bb6b", x + 37, y + 29, 25, 5);
+}
+
+function drawText(text, color, x, y, fontSize, lineWidth) {
     ctx.font = fontSize + 'px Sans-serif';
     ctx.strokeStyle = 'black';
     ctx.lineWidth = lineWidth;
     ctx.strokeText(text, x, y);
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = color;
     ctx.fillText(text, x, y);
+}
+
+function drawBorder(xPos, yPos, width, height, thickness = 1) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(xPos - (thickness), yPos - (thickness), width + (thickness * 2), height + (thickness * 2));
 }
 
 function reset() {
     clearInterval(interval);
-    document.getElementById('reset').blur();
-    
     frame = 0;
     score = 0;
     obstacles = [];
@@ -135,7 +183,7 @@ function updateScore() {
         }
     }
 
-    drawText(score, canvas.width / 2, 90, 70, 8);
+    drawText(score, "white", canvas.width / 2, 90, 70, 8);
 }
 
 function completed(obstacle) {
@@ -173,9 +221,20 @@ function collisionWith(obstacle) {
     return collision;
 }
 
-// function showRestartMenu() {
-//     fillRect()
-// }
+function getMousePos(event) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+
+function isInside(pos, rect){
+    return pos.x > rect.x 
+        && pos.x < rect.x + rect.width 
+        && pos.y < rect.y + rect.height 
+        && pos.y > rect.y;
+}
 
 /**************************************************
  * Components
