@@ -81,6 +81,8 @@ function clearScreen() {
 
 function reset() {
     clearInterval(interval);
+    document.getElementById('reset').blur();
+    
     frame = 1;
     score = 0;
     obstacles = [];
