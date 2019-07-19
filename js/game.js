@@ -11,6 +11,7 @@ var obstacleWidth = 85;
 var maxGap = 200;
 var floorHeight = 60;
 var hitboxCorrection = -4;
+var birdSize = { width: 51, height: 36 };
 
 var SPACE_BAR_KEY_CODE = 32;
 var gravity = 9.81;
@@ -33,7 +34,7 @@ window.onload = function() {
 };
 
 function setup() {
-    bird = new Bird((canvas.width - 51) / 2, (canvas.height - 36) / 2);
+    bird = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
     createObstaclePair(3 * obstacleSpacing);
     createObstaclePair(4 * obstacleSpacing);
 
@@ -56,7 +57,6 @@ function game() {
     // create new obstacles after a certain amount of frames
     if (frame % obstacleSpacing == 0) {
         createObstaclePair(4 * obstacleSpacing);
-        score++;
     }
 
     // show
@@ -71,7 +71,7 @@ function game() {
             clearInterval(interval);
             
             var paragraph = document.getElementById("p");
-            var text = document.createTextNode(getScore());
+            var text = document.createTextNode(score);
             var br = document.createElement("BR");
             paragraph.appendChild(text);
             paragraph.appendChild(br)
@@ -79,11 +79,12 @@ function game() {
     }
 
     // update
+    updateScore();
     for (var i = 0; i < obstacles.length; i++) {
         obstacles[i].update();
     }
     bird.update();
-    updateScore();
+
     frame++;
 }
 
@@ -91,7 +92,7 @@ function game() {
  * Helper Functions
  **************************************************/
 function clearScreen() {
-    ctx.fillStyle="#f1f1f1";
+    ctx.fillStyle="#87cefa";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     this.image = new Image();
@@ -112,14 +113,22 @@ function reset() {
     interval = setInterval(game, frameRate * 1000);
 }
 
-function getScore() {
-    return Math.max(score - 1, 0);
+function updateScore() {
+    for (var i = 0; i < obstacles.length; i++) {
+        var obstacle = obstacles[i];
+        if (! obstacle.completed && completed(obstacle)) {
+            obstacle.completed = true;
+            score += 0.5; // obstacles come in pairs
+        }
+    }
+
+    ctx.font = 'bold 60px serif';
+    ctx.fillStyle = "white";
+    ctx.fillText(score, canvas.width / 2, 90);
 }
 
-function updateScore() {
-    ctx.font = '30px serif';
-    ctx.fillStyle = "black";
-    ctx.fillText("Score: " + getScore(), canvas.width - 160, 50);
+function completed(obstacle) {
+    return bird.x > obstacle.x + obstacleWidth;
 }
 
 function createObstaclePair(x) {
@@ -161,8 +170,8 @@ function Bird(x, y) {
     this.y = y;
 
     // dimensions of bird.png
-    this.height = 36;
-    this.width = 51;
+    this.width = birdSize.width;
+    this.height = birdSize.height;
 
     this.vel = 0;
     this.acc = 0;
@@ -203,16 +212,28 @@ function Obstacle(x, y, width, height, isTopObstacle) {
     this.y = y;
     this.width = width;
     this.height = height;
+    this.completed = false;
+    this.image = new Image();
 
     this.show = function() {
-        this.image = new Image();
-
         if (isTopObstacle) {
             this.image.src = "sprites/pipe_flipped.png";
-            ctx.drawImage(this.image, 0, 600 - this.height, 84, this.height, this.x, this.y, 84, this.height);
+            ctx.drawImage(
+                this.image,
+                0, this.image.height - this.height,
+                this.image.width, this.height,
+                this.x, this.y,
+                this.image.width, this.height
+            );
         } else {
             this.image.src = "sprites/pipe.png"
-            ctx.drawImage(this.image, 0, 0, 84, this.height, this.x, this.y, 84, this.height);
+            ctx.drawImage(
+                this.image,
+                0, 0,
+                this.image.width, this.height,
+                this.x, this.y,
+                this.image.width, this.height
+            );
         }
     }
 
