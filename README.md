@@ -5,4 +5,4 @@ Flappy Bird... ~~but with a square~~! I originally just intended this to be a su
 
 ## Can you beat my hiscore?
 
-<img src="img/hiscore.png" width="400">
+<img src="img/hiscore.png" width="350">
