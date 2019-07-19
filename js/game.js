@@ -93,6 +93,11 @@ function game() {
 function clearScreen() {
     ctx.fillStyle="#f1f1f1";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    this.image = new Image();
+    this.image.src = "sprites/floor.png";
+    var state = (frame % 120);
+    ctx.drawImage(this.image, -state, 0);
 }
 
 function reset() {
@@ -118,11 +123,11 @@ function updateScore() {
 }
 
 function createObstaclePair(x) {
-    var maxTopObstacleHeight = canvas.height - (1.5 * bird.height + floorHeight);
+    var maxTopObstacleHeight = canvas.height - (2 * bird.height + floorHeight);
     var topObstacleHeight = Math.round(Math.random() * maxTopObstacleHeight);
     var topObstacle = new Obstacle(x, 0, obstacleWidth, topObstacleHeight, true);
 
-    var obstacleOpening = (1.5 * bird.height) + Math.round(Math.random() * maxGap);
+    var obstacleOpening = (2 * bird.height) + Math.round(Math.random() * maxGap);
     var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleOpening + floorHeight);
     var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleOpening, obstacleWidth, bottomObstacleHeight, false);
 
