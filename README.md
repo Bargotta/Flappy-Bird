@@ -4,6 +4,5 @@ Flappy Bird... ~~but with a square~~! I originally just intended this to be a su
 [See it in action](https://bargotta.github.io/Flappy-Square/)
 
 ## Can you beat my hiscore?
-(I'm pretty bad, so probably)
 
-![](img/hiscore.png)
+<img src="img/hiscore.png" width="400">
