@@ -7,7 +7,7 @@ var frameRate = 1/120;
 var interval;
 
 var obstacleSpacing = 250; // spacing between obstacle pairs
-var obstacleWidth = 20;
+var obstacleWidth = 90;
 var gravity = 9.81;
 var maxGap = 200;
 var hitboxCorrection = -4;
@@ -47,26 +47,41 @@ function setup() {
 function game() {
     clearScreen()
 
-    if (frame % obstacleSpacing == 0) {
-        createObstaclePair(4 * obstacleSpacing);
-        score++;
-    }
-
-    for (var i = 0; i < obstacles.length; i++) {
-        obstacles[i].show();
-        obstacles[i].update();
-    }
-    
     // remove obstacle pair if it's off screen
     if (obstacles[0].x < -obstacleWidth && obstacles[1].x < -obstacleWidth) {
         obstacles = obstacles.slice(2);
     }
 
-    detectCollision();
-    
-    bird.show();
-    bird.update();
+    // create new obstacles after a certain amount of frames
+    if (frame % obstacleSpacing == 0) {
+        createObstaclePair(4 * obstacleSpacing);
+        score++;
+    }
 
+    // show
+    for (var i = 0; i < obstacles.length; i++) {
+        obstacles[i].show();
+    }
+    bird.show();
+
+    // detect collision
+    for (var i = 0; i < obstacles.length; i++) {    
+        if (collisionWith(obstacles[i])) {
+            clearInterval(interval);
+            
+            var paragraph = document.getElementById("p");
+            var text = document.createTextNode(getScore());
+            var br = document.createElement("BR");
+            paragraph.appendChild(text);
+            paragraph.appendChild(br)
+        }
+    }
+
+    // update
+    for (var i = 0; i < obstacles.length; i++) {
+        obstacles[i].update();
+    }
+    bird.update();
     updateScore();
     frame++;
 }
@@ -129,19 +144,6 @@ function collisionWith(obstacle) {
         collision = false;
     }
     return collision;
-}
-
-function detectCollision() {
-    var collision = false;
-    if (collisionWith(obstacles[0]) || collisionWith(obstacles[1])) {
-        clearInterval(interval);
-        
-        var paragraph = document.getElementById("p");
-        var text = document.createTextNode(getScore());
-        var br = document.createElement("BR");
-        paragraph.appendChild(text);
-        paragraph.appendChild(br)
-    }
 }
 
 /**************************************************
