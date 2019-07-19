@@ -39,6 +39,7 @@ function setup() {
     document.body.onkeydown = function(e){
         if (e.keyCode == SPACE_BAR) {
             square.acc = jumpAcceleration;
+            if (square.vel > 0) square.vel = 0;
         }
     }
 }
