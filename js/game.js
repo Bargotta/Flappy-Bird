@@ -11,6 +11,8 @@ var bird;
 var obstacles = [];
 var gameOver = false;
 var debug = false;
+var pauseEnabled = true;
+var paused = false;
 
 // Parameters
 var frameRate = 1/120;
@@ -37,6 +39,7 @@ var restart = {
     height: 40
 };
 var SPACE_BAR_KEY_CODE = 32;
+var P_KEY_CODE = 80;
 
 window.onload = function() {
     canvas = document.getElementById('canvas');
@@ -54,11 +57,23 @@ function setup() {
         if (e.keyCode == SPACE_BAR_KEY_CODE) {
             fly(e);
         }
+
+        if (pauseEnabled && e.keyCode == P_KEY_CODE) {
+            if (paused) {
+                interval = setInterval(game, frameRate * 1000);
+                paused = false;
+            } else {
+                clearInterval(interval);
+                paused = true;
+            }
+        }
     }
     canvas.addEventListener('click', fly);
 }
 
 function fly(e) {
+    if (paused) return;
+    
     bird.acc = flapAcceleration;
     if (bird.vel > 0) bird.vel = 0;
     bird.angle = degreesToRadians(flapAngle);
@@ -304,4 +319,8 @@ function degreesToRadians(degree) {
 
 function radiansToDegrees(radian) {
     return radian * 180 / Math.PI;
+}
+
+function pause() {
+
 }
