@@ -117,14 +117,15 @@ function clearScreen() {
     ctx.fillStyle="#87cefa";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    this.image = new Image();
-    this.image.src = "img/floor.png";
+    this.floor = new Image();
+    this.floor.src = "img/floor.png";
     var state = bird.dead ? 0 : (frame % 120);
-    ctx.drawImage(this.image, -state, 0);
+    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
 
     var x = (canvas.width - 120) / 2;
     var y = canvas.height - 10;
     drawText("Press spacebar to fly", "white", x, y, 17, 5)
+    drawText("Aaron Bargotta", "white", 10, y, 13, 4)
 }
 
 function showRestartMenu() {
