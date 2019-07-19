@@ -7,7 +7,7 @@ var frameRate = 1/120;
 var interval;
 
 var obstacleSpacing = 250; // spacing between obstacle pairs
-var obstacleWidth = 90;
+var obstacleWidth = 85;
 var gravity = 9.81;
 var maxGap = 200;
 var hitboxCorrection = -4;
@@ -118,11 +118,11 @@ function updateScore() {
 
 function createObstaclePair(x) {
     var topObstacleHeight = Math.round(Math.random() * (canvas.height - (2 * bird.height)));
-    var topObstacle = new Obstacle(x, 0, obstacleWidth, topObstacleHeight);
+    var topObstacle = new Obstacle(x, 0, obstacleWidth, topObstacleHeight, true);
 
     var obstacleOpening = (2 * bird.height) + Math.round(Math.random() * maxGap);
     var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleOpening);
-    var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleOpening, obstacleWidth, bottomObstacleHeight);
+    var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleOpening, obstacleWidth, bottomObstacleHeight, false);
 
     obstacles.push(topObstacle);
     obstacles.push(bottomObstacle);
@@ -161,8 +161,6 @@ function Bird(x, y) {
     this.acc = 0;
 
     this.show = function() {
-        // ctx.fillStyle = 'red';
-        // ctx.fillRect(this.x, this.y, this.width, this.height);
         this.image = new Image();
         this.image.src = "sprites/bird.png";
         ctx.drawImage(this.image, this.x, this.y);
@@ -193,15 +191,22 @@ function Bird(x, y) {
     }
 }
 
-function Obstacle(x, y, width, height) {
+function Obstacle(x, y, width, height, isTopObstacle) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
 
-    this.show = function() {    
-        ctx.fillStyle = 'green';
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+    this.show = function() {
+        this.image = new Image();
+
+        if (isTopObstacle) {
+            this.image.src = "sprites/pipe_flipped.png";
+            ctx.drawImage(this.image, 0, 600 - this.height, 84, this.height, this.x, this.y, 84, this.height);
+        } else {
+            this.image.src = "sprites/pipe.png"
+            ctx.drawImage(this.image, this.x, this.y);
+        }
     }
 
     this.update = function() {
