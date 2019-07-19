@@ -6,6 +6,7 @@ var ctx;
 var interval;
 var frame = 0;
 var score = 0;
+var bestScore = 0;
 var bird;
 var obstacles = [];
 
@@ -66,18 +67,15 @@ function game() {
     for (var i = 0; i < obstacles.length; i++) {    
         if (! bird.dead && collisionWith(obstacles[i])) {
             bird.die();
-            
-            var paragraph = document.getElementById("p");
-            var text = document.createTextNode(score);
-            var br = document.createElement("BR");
-            paragraph.appendChild(text);
-            paragraph.appendChild(br)
         }
     }
 
     // Game Over...
     if (bird.dead && bird.onFloor) {
         clearInterval(interval);
+        bestScore = Math.max(bestScore, score);
+
+        // showRestartMenu();
     }
 
     // update
@@ -98,7 +96,7 @@ function clearScreen() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     this.image = new Image();
-    this.image.src = "sprites/floor.png";
+    this.image.src = "img/floor.png";
     var state = bird.dead ? 0 : (frame % 120);
     ctx.drawImage(this.image, -state, 0);
 
@@ -175,6 +173,10 @@ function collisionWith(obstacle) {
     return collision;
 }
 
+// function showRestartMenu() {
+//     fillRect()
+// }
+
 /**************************************************
  * Components
  **************************************************/
@@ -193,7 +195,7 @@ function Bird(x, y) {
 
     this.show = function() {
         this.image = new Image();
-        this.image.src = "sprites/bird.png";
+        this.image.src = "img/bird.png";
         ctx.drawImage(this.image, this.x, this.y);
     }
 
@@ -242,7 +244,7 @@ function Obstacle(x, y, height, isTopObstacle) {
 
     this.show = function() {
         if (isTopObstacle) {
-            this.image.src = "sprites/pipe_flipped.png";
+            this.image.src = "img/pipe_flipped.png";
             ctx.drawImage(
                 this.image,
                 0, this.image.height - this.height,
@@ -251,7 +253,7 @@ function Obstacle(x, y, height, isTopObstacle) {
                 this.image.width, this.height
             );
         } else {
-            this.image.src = "sprites/pipe.png"
+            this.image.src = "img/pipe.png"
             ctx.drawImage(
                 this.image,
                 0, 0,
