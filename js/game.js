@@ -5,10 +5,11 @@ var canvas;
 var ctx;
 var interval;
 var frame = 0;
-var score = 18;
+var score = 19;
 var bestScore = 0;
 var bird;
 var obstacles = [];
+var gameOver = false;
 var debug = false;
 
 // Parameters
@@ -86,7 +87,7 @@ function game() {
     // detect collision
     for (var i = 0; i < obstacles.length; i++) {    
         if (collisionWith(obstacles[i])) {
-            gameOver();
+            bird.die();
         }
     }
 
@@ -96,6 +97,10 @@ function game() {
         if (! bird.dead) obstacles[i].update();
     }
     bird.update();
+
+    // Better luck next time...
+    if (bird.dead) initiateGameOver();
+    if (gameOver) showRestartMenu();
 
     frame++;
 }
@@ -145,23 +150,24 @@ function setLevelOne() {
     this.floor.src = "img/levels/" + levels[1].img;
     var state = bird.dead ? 0 : (frame % levels[1].frameRate);
     ctx.drawImage(this.floor, -state, canvas.height - floor.height);
+
+    if (bird.onFloor) {
+        initiateGameOver();
+    }
 }
 
-function gameOver() {
+function initiateGameOver() {
     bird.die();
 
     // Game Over...
     if (bird.dead && bird.onFloor) {
         clearInterval(interval);
         bestScore = Math.max(bestScore, score);
-
-        console.log("restarting...");
-        showRestartMenu();
+        gameOver = true;
     }
 }
 
 function showRestartMenu() {
-    console.log("showing restart menu...");
     // show scoreboard
     var x = (canvas.width + scoreboard.x) / 2;
     var y = (canvas.height + scoreboard.y) / 2;
@@ -202,7 +208,8 @@ function reset() {
     canvas.removeEventListener('click', restartGame);
 
     frame = 0;
-    score = 0;
+    score = 19;
+    gameOver = false;
     obstacles = [];
 
     setup();
