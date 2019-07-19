@@ -4,7 +4,7 @@
 var canvas;
 var ctx;
 var interval;
-var frame = 1;
+var frame = 0;
 var score = 0;
 var bird;
 var obstacles = [];
@@ -13,8 +13,9 @@ var obstacles = [];
 var frameRate = 1/120;
 var hitboxCorrection = -4;
 var floorHeight = 60;
-var obstacleSpacing = 250; // horizontal spacing between obstacle pairs
-var maxOpeningGap = 200; // max distance between obstacle pair
+var obstacleSpawn = 750; // Location where obstacles are created
+var obstacleSpacing = 350; // horizontal spacing between obstacle pairs
+var maxOpeningGap = 200; // max distance between an obstacle pair
 var birdSize = { width: 51, height: 36 };
 var gravity = 9.81;
 var jumpAcceleration = -24;
@@ -34,8 +35,6 @@ window.onload = function() {
 
 function setup() {
     bird = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
-    createObstaclePair(3 * obstacleSpacing);
-    createObstaclePair(4 * obstacleSpacing);
 
     document.body.onkeydown = function(e){
         if (e.keyCode == SPACE_BAR_KEY_CODE) {
@@ -48,14 +47,14 @@ function setup() {
 function game() {
     clearScreen()
 
+    // create new obstacles after a certain amount of frames
+    if (frame % obstacleSpacing == 0) {
+        createObstaclePair(obstacleSpawn);
+    }
+
     // remove obstacle pair if it's off screen
     if (obstacles[0].x < -obstacles[0].width && obstacles[1].x < -obstacles[1].width) {
         obstacles = obstacles.slice(2);
-    }
-
-    // create new obstacles after a certain amount of frames
-    if (frame % obstacleSpacing == 0) {
-        createObstaclePair(4 * obstacleSpacing);
     }
 
     // show
@@ -104,7 +103,7 @@ function reset() {
     clearInterval(interval);
     document.getElementById('reset').blur();
     
-    frame = 1;
+    frame = 0;
     score = 0;
     obstacles = [];
 
