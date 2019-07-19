@@ -116,13 +116,19 @@ function updateScore() {
         var obstacle = obstacles[i];
         if (! obstacle.completed && completed(obstacle)) {
             obstacle.completed = true;
-            score += 0.5; // obstacles come in pairs
+            score += 0.5; // avoid double counting since obstacles come in pairs
         }
     }
 
-    ctx.font = 'bold 60px serif';
-    ctx.fillStyle = "white";
-    ctx.fillText(score, canvas.width / 2, 90);
+    var text = score;
+    var x = canvas.width / 2;
+    var y = 90;
+    ctx.font = '70px Sans-serif';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 8;
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = 'white';
+    ctx.fillText(text, x, y);
 }
 
 function completed(obstacle) {
