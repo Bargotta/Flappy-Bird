@@ -9,6 +9,7 @@ var score = 0;
 var bestScore = 0;
 var bird;
 var obstacles = [];
+var debug = false;
 
 // Parameters
 var frameRate = 1/120;
@@ -19,6 +20,7 @@ var obstacleSpacing = 350; // horizontal spacing between obstacle pairs
 var maxOpeningGap = 200; // max distance between an obstacle pair
 var gravity = 9.81;
 var flapAcceleration = -24;
+var flapAngle = -21;
 var decay = 0.75;
 
 var birdSize = { width: 51, height: 36 };
@@ -54,6 +56,7 @@ function setup() {
 function fly(e) {
     bird.acc = flapAcceleration;
     if (bird.vel > 0) bird.vel = 0;
+    bird.angle = degreesToRadians(flapAngle);
 }
 
 function game() {
@@ -167,35 +170,6 @@ function reset() {
     interval = setInterval(game, frameRate * 1000);
 }
 
-function getMousePos(event) {
-    var rect = canvas.getBoundingClientRect();
-    return {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-    };
-}
-
-function isInside(pos, rect){
-    return pos.x > rect.x 
-        && pos.x < rect.x + rect.width 
-        && pos.y < rect.y + rect.height 
-        && pos.y > rect.y;
-}
-
-function drawText(text, color, x, y, fontSize, lineWidth) {
-    ctx.font = fontSize + 'px Sans-serif';
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = lineWidth;
-    ctx.strokeText(text, x, y);
-    ctx.fillStyle = color;
-    ctx.fillText(text, x, y);
-}
-
-function drawBorder(xPos, yPos, width, height, thickness = 1) {
-  ctx.fillStyle = '#000';
-  ctx.fillRect(xPos - (thickness), yPos - (thickness), width + (thickness * 2), height + (thickness * 2));
-}
-
 function updateScore() {
     for (var i = 0; i < obstacles.length; i++) {
         var obstacle = obstacles[i];
@@ -234,11 +208,56 @@ function collisionWith(obstacle) {
     var obTop = obstacle.y;
     var obBottom = obstacle.y + obstacle.height;
 
+    if (debug) {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(bLeft, bTop, bRight - bLeft, bBottom - bTop);
+
+        ctx.fillStyle = 'red';
+        ctx.fillRect(obLeft, obTop, obRight - obLeft, obBottom - obTop);
+    }
+
     var collision = true;
     if (bBottom < obTop || bTop > obBottom || bRight < obLeft || bLeft > obRight) {
         collision = false;
     }
     return collision;
+}
+
+function getMousePos(event) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+
+function isInside(pos, rect){
+    return pos.x > rect.x 
+        && pos.x < rect.x + rect.width 
+        && pos.y < rect.y + rect.height 
+        && pos.y > rect.y;
+}
+
+function drawText(text, color, x, y, fontSize, lineWidth) {
+    ctx.font = fontSize + 'px Sans-serif';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = lineWidth;
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+}
+
+function drawBorder(xPos, yPos, width, height, thickness = 1) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(xPos - (thickness), yPos - (thickness), width + (thickness * 2), height + (thickness * 2));
+}
+
+function degreesToRadians(degree) {
+    return degree * Math.PI / 180;
+}
+
+function radiansToDegrees(radian) {
+    return radian * 180 / Math.PI;
 }
 
 /**************************************************
@@ -254,13 +273,19 @@ function Bird(x, y) {
 
     this.vel = 0;
     this.acc = 0;
+    this.angle = 0;
     this.dead = false;
     this.onFloor = false;
 
     this.show = function() {
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+        ctx.rotate(this.angle);
+
         this.image = new Image();
         this.image.src = "img/bird.png";
-        ctx.drawImage(this.image, this.x, this.y);
+        ctx.drawImage(this.image, this.width / -2, this.height / -2);
+        ctx.restore();
     }
 
     this.update = function() {
@@ -268,7 +293,11 @@ function Bird(x, y) {
         this.vel += (this.acc + gravity) * frameRate;
         this.y += this.vel * frameRate * 100;
         this.acc = Math.min(0, this.acc + decay);
-        
+
+        if (this.vel > 0 && radiansToDegrees(this.angle) < 90) {
+            this.angle += degreesToRadians(1);
+        }
+
         this.onFloor = this.hitFloor();
         this.hitCeil();
     }
@@ -284,6 +313,7 @@ function Bird(x, y) {
         if (this.y >= floor) {
             this.y = floor;
             this.vel = 0;
+            this.angle = 0;
             return true;
         }
         return false;
