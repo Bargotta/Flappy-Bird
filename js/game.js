@@ -65,8 +65,8 @@ function game() {
 
     // detect collision
     for (var i = 0; i < obstacles.length; i++) {    
-        if (collisionWith(obstacles[i])) {
-            clearInterval(interval);
+        if (! bird.dead && collisionWith(obstacles[i])) {
+            bird.dead = true;
             
             var paragraph = document.getElementById("p");
             var text = document.createTextNode(score);
@@ -76,10 +76,15 @@ function game() {
         }
     }
 
+    // Game Over...
+    if (bird.dead && bird.onFloor) {
+        clearInterval(interval);
+    }
+
     // update
     updateScore();
     for (var i = 0; i < obstacles.length; i++) {
-        obstacles[i].update();
+        if (! bird.dead) obstacles[i].update();
     }
     bird.update();
 
@@ -95,7 +100,7 @@ function clearScreen() {
 
     this.image = new Image();
     this.image.src = "sprites/floor.png";
-    var state = (frame % 120);
+    var state = bird.dead ? 0 : (frame % 120);
     ctx.drawImage(this.image, -state, 0);
 }
 
@@ -179,6 +184,8 @@ function Bird(x, y) {
 
     this.vel = 0;
     this.acc = 0;
+    this.dead = false;
+    this.onFloor = false;
 
     this.show = function() {
         this.image = new Image();
@@ -191,7 +198,8 @@ function Bird(x, y) {
         this.vel += (this.acc + gravity) * frameRate;
         this.y += this.vel * frameRate * 100;
         this.acc = Math.min(0, this.acc + decay);
-        this.hitFloor();
+        
+        this.onFloor = this.hitFloor();
         this.hitCeil();
     }
 
@@ -200,14 +208,18 @@ function Bird(x, y) {
         if (this.y >= floor) {
             this.y = floor;
             this.vel = 0;
+            return true;
         }
+        return false;
     }
 
     this.hitCeil = function() {
         if (this.y <= 0) {
             this.y = 0;
             this.vel = 0;
+            return true;
         }
+        return false;
     }
 }
 
