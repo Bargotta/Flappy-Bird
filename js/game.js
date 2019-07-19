@@ -26,8 +26,8 @@ var decay = 0.75;
 var birdSize = { width: 51, height: 36 };
 var scoreboard = { x: -150, y: -300, width: 150, height: 180 };
 var levels = {
-    0: { img: "floor.png", frameRate: 120 },
-    1: { img: "lava.png", frameRate: 20 }
+    0: { img: "floor.png", frameRate: 120, background: "#87cefa" },
+    1: { img: "lava.png", frameRate: 20, background: "#ffe6b3" }
 };
 var restart = {
     x: scoreboard.x,
@@ -85,17 +85,9 @@ function game() {
 
     // detect collision
     for (var i = 0; i < obstacles.length; i++) {    
-        if (! bird.dead && collisionWith(obstacles[i])) {
-            bird.die();
+        if (collisionWith(obstacles[i])) {
+            gameOver();
         }
-    }
-
-    // Game Over...
-    if (bird.dead && bird.onFloor) {
-        clearInterval(interval);
-        bestScore = Math.max(bestScore, score);
-
-        showRestartMenu();
     }
 
     // update
@@ -112,9 +104,6 @@ function game() {
  * Helper Functions
  **************************************************/
 function clearScreen() {
-    ctx.fillStyle="#87cefa";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     setLevel(getLevel());
 
     var x = (canvas.width - 160) / 2;
@@ -123,28 +112,56 @@ function clearScreen() {
     drawText("Aaron Bargotta", "white", 10, y, 13, 4)
 }
 
-function setLevel(level) {
-    this.floor = new Image();
-    this.floor.src = "img/levels/" + levels[level].img;
-    var state = bird.dead ? 0 : (frame % levels[level].frameRate);
-    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
+function getLevel() {
+    return Math.floor(score / 20);
+}
 
+function setLevel(level) {
     switch (level) {
+        case 0:
+            setLevelZero();
+            break
         case 1:
             setLevelOne();
             break;
     }
 }
 
-function getLevel() {
-    return Math.floor(score / 20);
+function setLevelZero() {
+    ctx.fillStyle = levels[0].background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    this.floor = new Image();
+    this.floor.src = "img/levels/" + levels[0].img;
+    var state = bird.dead ? 0 : (frame % levels[0].frameRate);
+    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
 }
 
 function setLevelOne() {
-    return true;
+    ctx.fillStyle = levels[1].background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    this.floor = new Image();
+    this.floor.src = "img/levels/" + levels[1].img;
+    var state = bird.dead ? 0 : (frame % levels[1].frameRate);
+    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
+}
+
+function gameOver() {
+    bird.die();
+
+    // Game Over...
+    if (bird.dead && bird.onFloor) {
+        clearInterval(interval);
+        bestScore = Math.max(bestScore, score);
+
+        console.log("restarting...");
+        showRestartMenu();
+    }
 }
 
 function showRestartMenu() {
+    console.log("showing restart menu...");
     // show scoreboard
     var x = (canvas.width + scoreboard.x) / 2;
     var y = (canvas.height + scoreboard.y) / 2;
