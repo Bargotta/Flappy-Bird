@@ -8,11 +8,12 @@ var interval;
 
 var obstacleSpacing = 250; // spacing between obstacle pairs
 var obstacleWidth = 85;
-var gravity = 9.81;
 var maxGap = 200;
+var floorHeight = 60;
 var hitboxCorrection = -4;
 
 var SPACE_BAR_KEY_CODE = 32;
+var gravity = 9.81;
 var jumpAcceleration = -24;
 var decay = 0.75;
 
@@ -117,11 +118,12 @@ function updateScore() {
 }
 
 function createObstaclePair(x) {
-    var topObstacleHeight = Math.round(Math.random() * (canvas.height - (2 * bird.height)));
+    var maxTopObstacleHeight = canvas.height - (1.5 * bird.height + floorHeight);
+    var topObstacleHeight = Math.round(Math.random() * maxTopObstacleHeight);
     var topObstacle = new Obstacle(x, 0, obstacleWidth, topObstacleHeight, true);
 
-    var obstacleOpening = (2 * bird.height) + Math.round(Math.random() * maxGap);
-    var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleOpening);
+    var obstacleOpening = (1.5 * bird.height) + Math.round(Math.random() * maxGap);
+    var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleOpening + floorHeight);
     var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleOpening, obstacleWidth, bottomObstacleHeight, false);
 
     obstacles.push(topObstacle);
@@ -176,7 +178,7 @@ function Bird(x, y) {
     }
 
     this.hitFloor = function() {
-        var floor = canvas.height - this.height;
+        var floor = canvas.height - this.height - floorHeight;
         if (this.y >= floor) {
             this.y = floor;
             this.vel = 0;
@@ -205,7 +207,7 @@ function Obstacle(x, y, width, height, isTopObstacle) {
             ctx.drawImage(this.image, 0, 600 - this.height, 84, this.height, this.x, this.y, 84, this.height);
         } else {
             this.image.src = "sprites/pipe.png"
-            ctx.drawImage(this.image, this.x, this.y);
+            ctx.drawImage(this.image, 0, 0, 84, this.height, this.x, this.y, 84, this.height);
         }
     }
 
