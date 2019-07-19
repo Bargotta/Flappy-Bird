@@ -5,7 +5,7 @@ var canvas;
 var ctx;
 var interval;
 var frame = 0;
-var score = 0;
+var score = 18;
 var bestScore = 0;
 var bird;
 var obstacles = [];
@@ -25,6 +25,10 @@ var decay = 0.75;
 
 var birdSize = { width: 51, height: 36 };
 var scoreboard = { x: -150, y: -300, width: 150, height: 180 };
+var levels = {
+    0: { img: "floor.png", frameRate: 120 },
+    1: { img: "lava.png", frameRate: 20 }
+};
 var restart = {
     x: scoreboard.x,
     y: scoreboard.y + (2 * scoreboard.height) + 60,
@@ -111,15 +115,33 @@ function clearScreen() {
     ctx.fillStyle="#87cefa";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    this.floor = new Image();
-    this.floor.src = "img/floor.png";
-    var state = bird.dead ? 0 : (frame % 120);
-    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
+    setLevel(getLevel());
 
     var x = (canvas.width - 160) / 2;
     var y = canvas.height - 10;
     drawText("Click or press spacebar to fly", "white", x, y, 17, 5)
     drawText("Aaron Bargotta", "white", 10, y, 13, 4)
+}
+
+function setLevel(level) {
+    this.floor = new Image();
+    this.floor.src = "img/levels/" + levels[level].img;
+    var state = bird.dead ? 0 : (frame % levels[level].frameRate);
+    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
+
+    switch (level) {
+        case 1:
+            setLevelOne();
+            break;
+    }
+}
+
+function getLevel() {
+    return Math.floor(score / 20);
+}
+
+function setLevelOne() {
+    return true;
 }
 
 function showRestartMenu() {
