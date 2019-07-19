@@ -47,9 +47,6 @@ function setup() {
 function game() {
     clearScreen()
 
-    bird.show();
-    bird.update();
-
     if (frame % obstacleSpacing == 0) {
         createObstaclePair(4 * obstacleSpacing);
         score++;
@@ -66,6 +63,9 @@ function game() {
     }
 
     detectCollision();
+    
+    bird.show();
+    bird.update();
 
     updateScore();
     frame++;
