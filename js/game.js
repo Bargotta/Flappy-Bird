@@ -65,7 +65,7 @@ function game() {
     // detect collision
     for (var i = 0; i < obstacles.length; i++) {    
         if (! bird.dead && collisionWith(obstacles[i])) {
-            bird.dead = true;
+            bird.die();
             
             var paragraph = document.getElementById("p");
             var text = document.createTextNode(score);
@@ -205,6 +205,11 @@ function Bird(x, y) {
         
         this.onFloor = this.hitFloor();
         this.hitCeil();
+    }
+
+    this.die = function() {
+        this.dead = true;
+        document.body.onkeydown = null;
     }
 
     this.hitFloor = function() {
