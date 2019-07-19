@@ -18,7 +18,7 @@ var obstacleSpawn = 750; // Location where obstacles are created
 var obstacleSpacing = 350; // horizontal spacing between obstacle pairs
 var maxOpeningGap = 200; // max distance between an obstacle pair
 var gravity = 9.81;
-var jumpAcceleration = -24;
+var flapAcceleration = -24;
 var decay = 0.75;
 
 var birdSize = { width: 51, height: 36 };
@@ -43,12 +43,17 @@ window.onload = function() {
 function setup() {
     bird = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
 
-    document.body.onkeydown = function(e){
+    document.body.onkeydown = function(e) {
         if (e.keyCode == SPACE_BAR_KEY_CODE) {
-            bird.acc = jumpAcceleration;
-            if (bird.vel > 0) bird.vel = 0;
+            fly(e);
         }
     }
+    canvas.addEventListener('click', fly);
+}
+
+function fly(e) {
+    bird.acc = flapAcceleration;
+    if (bird.vel > 0) bird.vel = 0;
 }
 
 function game() {
@@ -69,6 +74,7 @@ function game() {
         obstacles[i].show();
     }
     bird.show();
+    drawText(score, "white", canvas.width / 2, 90, 70, 8);
 
     // detect collision
     for (var i = 0; i < obstacles.length; i++) {    
@@ -107,9 +113,9 @@ function clearScreen() {
     var state = bird.dead ? 0 : (frame % 120);
     ctx.drawImage(this.floor, -state, canvas.height - floor.height);
 
-    var x = (canvas.width - 120) / 2;
+    var x = (canvas.width - 160) / 2;
     var y = canvas.height - 10;
-    drawText("Press spacebar to fly", "white", x, y, 17, 5)
+    drawText("Click or press spacebar to fly", "white", x, y, 17, 5)
     drawText("Aaron Bargotta", "white", 10, y, 13, 4)
 }
 
@@ -138,12 +144,12 @@ function showRestartMenu() {
     canvas.addEventListener('click', restartGame);
 }
 
-function restartGame(evt) {
+function restartGame(e) {
     var x = (canvas.width + restart.x) / 2;
     var y = (canvas.height + restart.y) / 2;
     var rect = { x: x, y: y, width: restart.width, height: restart.height };
 
-    var mousePos = getMousePos(evt);
+    var mousePos = getMousePos(e);
     if (isInside(mousePos, rect)) {
         reset();
     }
@@ -198,8 +204,6 @@ function updateScore() {
             score += 0.5; // avoid double counting since obstacles come in pairs
         }
     }
-
-    drawText(score, "white", canvas.width / 2, 90, 70, 8);
 }
 
 function completed(obstacle) {
@@ -260,7 +264,7 @@ function Bird(x, y) {
     }
 
     this.update = function() {
-        this.acc = Math.max(this.acc, jumpAcceleration * 1.25);
+        this.acc = Math.max(this.acc, flapAcceleration * 1.25);
         this.vel += (this.acc + gravity) * frameRate;
         this.y += this.vel * frameRate * 100;
         this.acc = Math.min(0, this.acc + decay);
@@ -272,6 +276,7 @@ function Bird(x, y) {
     this.die = function() {
         this.dead = true;
         document.body.onkeydown = null;
+        canvas.removeEventListener('click', fly);
     }
 
     this.hitFloor = function() {
