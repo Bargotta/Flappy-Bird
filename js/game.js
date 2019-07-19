@@ -73,7 +73,7 @@ function setup() {
 
 function fly(e) {
     if (paused) return;
-    
+
     bird.acc = flapAcceleration;
     if (bird.vel > 0) bird.vel = 0;
     bird.angle = degreesToRadians(flapAngle);

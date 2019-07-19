@@ -5,17 +5,17 @@ My own version of Flappy Bird! I originally just intended this to be a super sim
 
 ### Levels
 
-#### Level Zero (Complete)
+#### Level One (Complete)
 
 Avoid the pipes!
 
-<img src="img/screenshots/zero.png" width="350">
+<img src="img/screenshots/one.png" width="350">
 
-#### Level One (Complete)
+#### Level Two (Complete)
 
 Avoid the pipes and floor!
 
-<img src="img/screenshots/zero.png" width="350">
+<img src="img/screenshots/two.png" width="350">
 
 #### Level Three (TODO)
 
