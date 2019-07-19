@@ -26,7 +26,6 @@ var SPACE_BAR_KEY_CODE = 32;
 window.onload = function() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
-
     document.body.appendChild(canvas);
 
     setup();
@@ -102,6 +101,19 @@ function clearScreen() {
     this.image.src = "sprites/floor.png";
     var state = bird.dead ? 0 : (frame % 120);
     ctx.drawImage(this.image, -state, 0);
+
+    var x = (canvas.width - 120) / 2;
+    var y = canvas.height - 10;
+    drawText("Press spacebar to fly", x, y, 17, 5)
+}
+
+function drawText(text, x, y, fontSize, lineWidth) {
+    ctx.font = fontSize + 'px Sans-serif';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = lineWidth;
+    ctx.strokeText(text, x, y);
+    ctx.fillStyle = 'white';
+    ctx.fillText(text, x, y);
 }
 
 function reset() {
@@ -125,15 +137,7 @@ function updateScore() {
         }
     }
 
-    var text = score;
-    var x = canvas.width / 2;
-    var y = 90;
-    ctx.font = '70px Sans-serif';
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 8;
-    ctx.strokeText(text, x, y);
-    ctx.fillStyle = 'white';
-    ctx.fillText(text, x, y);
+    drawText(score, canvas.width / 2, 90, 70, 8);
 }
 
 function completed(obstacle) {
