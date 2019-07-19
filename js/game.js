@@ -3,25 +3,24 @@
  **************************************************/
 var canvas;
 var ctx;
-var frameRate = 1/120;
 var interval;
-
-var obstacleSpacing = 250; // spacing between obstacle pairs
-var obstacleWidth = 85;
-var maxGap = 200;
-var floorHeight = 60;
-var hitboxCorrection = -4;
-var birdSize = { width: 51, height: 36 };
-
-var SPACE_BAR_KEY_CODE = 32;
-var gravity = 9.81;
-var jumpAcceleration = -24;
-var decay = 0.75;
-
 var frame = 1;
 var score = 0;
 var bird;
 var obstacles = [];
+
+// Parameters
+var frameRate = 1/120;
+var hitboxCorrection = -4;
+var floorHeight = 60;
+var obstacleSpacing = 250; // horizontal spacing between obstacle pairs
+var maxOpeningGap = 200; // max distance between obstacle pair
+var birdSize = { width: 51, height: 36 };
+var gravity = 9.81;
+var jumpAcceleration = -24;
+var decay = 0.75;
+
+var SPACE_BAR_KEY_CODE = 32;
 
 window.onload = function() {
     canvas = document.getElementById('canvas');
@@ -50,7 +49,7 @@ function game() {
     clearScreen()
 
     // remove obstacle pair if it's off screen
-    if (obstacles[0].x < -obstacleWidth && obstacles[1].x < -obstacleWidth) {
+    if (obstacles[0].x < -obstacles[0].width && obstacles[1].x < -obstacles[1].width) {
         obstacles = obstacles.slice(2);
     }
 
@@ -128,17 +127,17 @@ function updateScore() {
 }
 
 function completed(obstacle) {
-    return bird.x > obstacle.x + obstacleWidth;
+    return bird.x > obstacle.x + obstacle.width;
 }
 
 function createObstaclePair(x) {
     var maxTopObstacleHeight = canvas.height - (2 * bird.height + floorHeight);
     var topObstacleHeight = Math.round(Math.random() * maxTopObstacleHeight);
-    var topObstacle = new Obstacle(x, 0, obstacleWidth, topObstacleHeight, true);
+    var topObstacle = new Obstacle(x, 0, topObstacleHeight, true);
 
-    var obstacleOpening = (2 * bird.height) + Math.round(Math.random() * maxGap);
+    var obstacleOpening = (2 * bird.height) + Math.round(Math.random() * maxOpeningGap);
     var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleOpening + floorHeight);
-    var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleOpening, obstacleWidth, bottomObstacleHeight, false);
+    var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleOpening, bottomObstacleHeight, false);
 
     obstacles.push(topObstacle);
     obstacles.push(bottomObstacle);
@@ -207,10 +206,10 @@ function Bird(x, y) {
     }
 }
 
-function Obstacle(x, y, width, height, isTopObstacle) {
+function Obstacle(x, y, height, isTopObstacle) {
     this.x = x;
     this.y = y;
-    this.width = width;
+    this.width;
     this.height = height;
     this.completed = false;
     this.image = new Image();
@@ -235,6 +234,7 @@ function Obstacle(x, y, width, height, isTopObstacle) {
                 this.image.width, this.height
             );
         }
+        this.width = this.image.width;
     }
 
     this.update = function() {
