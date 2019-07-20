@@ -19,7 +19,7 @@ var hitboxCorrection = -4;
 var floorHeight = 60;
 var obstacleSpawn = 750; // Location where obstacles are created
 var obstacleSpacing = 370; // horizontal spacing between obstacle pairs
-var maxOpeningGap = 200; // max distance between an obstacle pair
+var maxObstacleGap = 200; // max distance between an obstacle pair
 var gravity = 9.81;
 var decay = 0.75;
 
@@ -105,8 +105,15 @@ function game() {
     }
 
     // remove obstacle pair if it's off screen
-    if (obstacles[0].x < -obstacles[0].width && obstacles[1].x < -obstacles[1].width) {
+    if (obstacles[0].currX < -obstacles[0].width && obstacles[1].currX < -obstacles[1].width) {
         obstacles = obstacles.slice(2);
+    }
+
+    // detect collision
+    for (var i = 0; i < obstacles.length; i++) {    
+        if (collisionWith(obstacles[i])) {
+            bird.die();
+        }
     }
 
     // show
@@ -116,13 +123,11 @@ function game() {
     bird.show();
     var center = (canvas.width / 2) - (20 * score.toString().length);
     drawText(score, "white", center, 90, 70, 8);
-
-    // detect collision
-    for (var i = 0; i < obstacles.length; i++) {    
-        if (collisionWith(obstacles[i])) {
-            bird.die();
-        }
-    }
+    addFloor(getLevel());
+    var x = (canvas.width - 160) / 2;
+    var y = canvas.height - 10;
+    drawText("Click or press spacebar to fly", "white", x, y, 17, 5)
+    drawText("Aaron Bargotta", "white", 10, y, 13, 4)
 
     // update
     updateScore();
@@ -143,11 +148,6 @@ function game() {
  **************************************************/
 function clearScreen() {
     setLevel(getLevel());
-
-    var x = (canvas.width - 160) / 2;
-    var y = canvas.height - 10;
-    drawText("Click or press spacebar to fly", "white", x, y, 17, 5)
-    drawText("Aaron Bargotta", "white", 10, y, 13, 4)
 }
 
 function getLevel() {
@@ -157,38 +157,46 @@ function getLevel() {
 function setLevel(level) {
     switch (level) {
         case 0:
-            setLevelZero();
+            setLevelOne();
             break
         case 1:
-            setLevelOne();
+            setLevelTwo();
+            break;
+        case 2:
+            setLevelThree();
             break;
         default:
-            setLevelZero();
+            setLevelOne();
     }
 }
 
-function setLevelZero() {
+function setLevelOne() {
     ctx.fillStyle = levels[0].background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    this.floor = new Image();
-    this.floor.src = "img/levels/" + levels[0].img;
-    var state = bird.dead ? 0 : (frame % levels[0].frameRate);
-    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
 }
 
-function setLevelOne() {
+function setLevelTwo() {
     ctx.fillStyle = levels[1].background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    this.floor = new Image();
-    this.floor.src = "img/levels/" + levels[1].img;
-    var state = bird.dead ? 0 : (frame % levels[1].frameRate);
-    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
 
     if (bird.onFloor) {
         initiateGameOver();
     }
+}
+
+function setLevelThree() {
+    setLevelTwo();
+
+    for (var i = 0; i < obstacles.length; i++) {
+        obstacles[i].oscillate = true;
+    }
+}
+
+function addFloor(i) {
+    this.floor = new Image();
+    this.floor.src = "img/levels/" + levels[i].img;
+    var state = bird.dead ? 0 : (frame % levels[i].frameRate);
+    ctx.drawImage(this.floor, -state, canvas.height - floor.height);
 }
 
 function initiateGameOver() {
@@ -263,17 +271,26 @@ function updateScore() {
 }
 
 function completed(obstacle) {
-    return bird.x > obstacle.x + obstacle.width;
+    return bird.x > obstacle.currX + obstacle.width;
 }
 
 function createObstaclePair(x) {
     var maxTopObstacleHeight = canvas.height - (3 * bird.height + floorHeight);
     var topObstacleHeight = Math.round(Math.random() * maxTopObstacleHeight);
-    var topObstacle = new Obstacle(x, 0, topObstacleHeight, true);
 
-    var obstacleOpening = (3 * bird.height) + Math.round(Math.random() * maxOpeningGap);
-    var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleOpening + floorHeight);
-    var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleOpening, bottomObstacleHeight, false);
+    var obstacleGap = (3 * bird.height) + Math.round(Math.random() * maxObstacleGap);
+    obstacleGap = Math.min(obstacleGap, canvas.height - (topObstacleHeight + floorHeight))
+    var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleGap + floorHeight);
+
+    var meta = {
+        canvas: canvas,
+        floorHeight: floorHeight,
+        gap: obstacleGap,
+        bottomObstacleHeight: bottomObstacleHeight,
+        topObstacleHeight: topObstacleHeight
+    };
+    var topObstacle = new Obstacle(x, 0, topObstacleHeight, meta, true);
+    var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleGap, bottomObstacleHeight, meta, false);
 
     obstacles.push(topObstacle);
     obstacles.push(bottomObstacle);
@@ -285,10 +302,10 @@ function collisionWith(obstacle) {
     var bTop = bird.y;
     var bBottom = bird.y + bird.height;
 
-    var obLeft = obstacle.x;
-    var obRight = obstacle.x + obstacle.width;
-    var obTop = obstacle.y;
-    var obBottom = obstacle.y + obstacle.height;
+    var obLeft = obstacle.currX;
+    var obRight = obstacle.currX + obstacle.width;
+    var obTop = obstacle.isTopObstacle ? obstacle.y : obstacle.currY;
+    var obBottom = obstacle.isTopObstacle ? obstacle.currY + obstacle.height : obstacle.currY + obstacle.image.height;
 
     if (debug) {
         ctx.fillStyle = 'red';
@@ -296,10 +313,11 @@ function collisionWith(obstacle) {
 
         ctx.fillStyle = 'red';
         ctx.fillRect(obLeft, obTop, obRight - obLeft, obBottom - obTop);
+        return false;
     }
 
     var collision = true;
-    if (bBottom < obTop || bTop > obBottom || bRight < obLeft || bLeft > obRight) {
+    if (bBottom <= obTop || bTop >= obBottom || bRight <= obLeft || bLeft >= obRight) {
         collision = false;
     }
     return collision;
