@@ -15,16 +15,29 @@ var pauseEnabled = true;
 var paused = false;
 
 // Parameters
-var frameRate = 1/120;
 var hitboxCorrection = -4;
 var floorHeight = 60;
 var obstacleSpawn = 750; // Location where obstacles are created
 var obstacleSpacing = 370; // horizontal spacing between obstacle pairs
 var maxOpeningGap = 200; // max distance between an obstacle pair
 var gravity = 9.81;
-var flapAcceleration = -24;
-var flapAngle = -21;
 var decay = 0.75;
+
+var frameRate;
+var flapAcceleration;
+var flapAngle;
+var speeds = {
+    0: {
+        frameRate: 1/120,
+        flapAcceleration: -24,
+        flapAngle: -21
+    },
+    1: {
+        frameRate: 1/180,
+        flapAcceleration: -29,
+        flapAngle: -35
+    }
+};
 
 var birdSize = { width: 51, height: 36 };
 var scoreboard = { x: -150, y: -300, width: 150, height: 180 };
@@ -52,6 +65,10 @@ window.onload = function() {
 
 function setup() {
     bird = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
+
+    frameRate = speeds[1].frameRate;
+    flapAcceleration = speeds[1].flapAcceleration;
+    flapAngle = speeds[1].flapAngle;
 
     document.body.onkeydown = function(e) {
         if (e.keyCode == SPACE_BAR_KEY_CODE) {
@@ -250,11 +267,11 @@ function completed(obstacle) {
 }
 
 function createObstaclePair(x) {
-    var maxTopObstacleHeight = canvas.height - (2 * bird.height + floorHeight);
+    var maxTopObstacleHeight = canvas.height - (3 * bird.height + floorHeight);
     var topObstacleHeight = Math.round(Math.random() * maxTopObstacleHeight);
     var topObstacle = new Obstacle(x, 0, topObstacleHeight, true);
 
-    var obstacleOpening = (2 * bird.height) + Math.round(Math.random() * maxOpeningGap);
+    var obstacleOpening = (3 * bird.height) + Math.round(Math.random() * maxOpeningGap);
     var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleOpening + floorHeight);
     var bottomObstacle = new Obstacle(x, topObstacleHeight + obstacleOpening, bottomObstacleHeight, false);
 
