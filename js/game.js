@@ -19,7 +19,8 @@ var hitboxCorrection = -4;
 var floorHeight = 60;
 var obstacleSpawn = 750; // Location where obstacles are created
 var obstacleSpacing = 370; // horizontal spacing between obstacle pairs
-var maxObstacleGap = 200; // max distance between an obstacle pair
+var maxGap = 200; // max distance between an obstacle pair
+var minGapFactor = 3; // gap must be a minimum of minGapFactor * bird.height
 var gravity = 9.81;
 var decay = 0.75;
 
@@ -283,10 +284,10 @@ function completed(obstacle) {
 }
 
 function createObstaclePair(x) {
-    var maxTopObstacleHeight = canvas.height - (3 * bird.height + floorHeight);
+    var maxTopObstacleHeight = canvas.height - (minGapFactor * bird.height + floorHeight);
     var topObstacleHeight = Math.round(Math.random() * maxTopObstacleHeight);
 
-    var obstacleGap = (3 * bird.height) + Math.round(Math.random() * maxObstacleGap);
+    var obstacleGap = (minGapFactor * bird.height) + Math.round(Math.random() * maxGap);
     obstacleGap = Math.min(obstacleGap, canvas.height - (topObstacleHeight + floorHeight))
     var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleGap + floorHeight);
 
