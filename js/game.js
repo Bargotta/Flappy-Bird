@@ -26,25 +26,26 @@ var decay = 0.75;
 var frameRate;
 var flapAcceleration;
 var flapAngle;
-var speeds = {
-    0: {
+var speeds = [
+    {
         frameRate: 1/120,
         flapAcceleration: -24,
         flapAngle: -21
     },
-    1: {
+    {
         frameRate: 1/180,
         flapAcceleration: -29,
         flapAngle: -35
     }
-};
+];
 
 var birdSize = { width: 51, height: 36 };
 var scoreboard = { x: -150, y: -300, width: 150, height: 180 };
-var levels = {
-    0: { img: "floor.png", frameRate: 120, background: "#87cefa" },
-    1: { img: "lava.png", frameRate: 20, background: "#ffe6b3" }
-};
+var levels = [
+    { img: "floor.png", frameRate: 120, background: "#87cefa" },
+    { img: "lava.png", frameRate: 20, background: "#ffe6b3" },
+    { img: "lava.png", frameRate: 20, background: "#ffe6b3" }
+];
 var restart = {
     x: scoreboard.x,
     y: scoreboard.y + (2 * scoreboard.height) + 60,
@@ -193,6 +194,7 @@ function setLevelThree() {
 }
 
 function addFloor(i) {
+    i = (i >= levels.length) ? 0 : i;
     this.floor = new Image();
     this.floor.src = "img/levels/" + levels[i].img;
     var state = bird.dead ? 0 : (frame % levels[i].frameRate);
