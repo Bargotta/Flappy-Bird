@@ -17,10 +17,15 @@ Avoid the pipes and floor!
 
 <img src="img/screenshots/two.png" width="350">
 
-#### Level Three (TODO)
+#### Level Three (Complete)
 
-Avoid the pipes, floor, and don't let your energy bar deplete!
+Pay attention to the moving pipes!
+<img src="img/screenshots/three.gif" width="350">
 
 #### Level Four (TODO)
 
 Can you make it through the tunnels in darkness?
+
+#### Hard Mode (TODO)
+
+Avoid the pipes, floor, and don't let your energy bar deplete!
