@@ -80,7 +80,7 @@ function fly(e) {
 }
 
 function game() {
-    clearScreen()
+    clearScreen();
 
     // create new obstacles after a certain amount of frames
     if (frame % obstacleSpacing == 0) {
@@ -97,7 +97,8 @@ function game() {
         obstacles[i].show();
     }
     bird.show();
-    drawText(score, "white", canvas.width / 2, 90, 70, 8);
+    var center = (canvas.width / 2) - (20 * score.toString().length);
+    drawText(score, "white", center, 90, 70, 8);
 
     // detect collision
     for (var i = 0; i < obstacles.length; i++) {    
@@ -144,6 +145,8 @@ function setLevel(level) {
         case 1:
             setLevelOne();
             break;
+        default:
+            setLevelZero();
     }
 }
 
@@ -191,10 +194,11 @@ function showRestartMenu() {
     ctx.fillRect(x, y, scoreboard.width, scoreboard.height);
 
     // add scores to scoreboard
-    drawText("Score", "#df8b03", x + (scoreboard.width / 2) - 27, y + 35, 25, 5);
-    drawText(score, "white", x + (scoreboard.width / 2) - 5, y + 70, 25, 5);
-    drawText("Best", "#df8b03", x + (scoreboard.width / 2) - 20, y + 125, 25, 5);
-    drawText(bestScore, "white", x + (scoreboard.width / 2) - 5, y + 160, 25, 5);
+    var xOffset = x + (scoreboard.width / 2);
+    drawText("Score", "#df8b03", xOffset - 30, y + 35, 25, 5);
+    drawText("Best", "#df8b03", xOffset - 23, y + 125, 25, 5);
+    drawText(score, "white", xOffset - (6 * score.toString().length), y + 70, 25, 5);
+    drawText(bestScore, "white", xOffset - (6 * bestScore.toString().length), y + 160, 25, 5);
 
     // show restart button
     var x = (canvas.width + restart.x) / 2;
