@@ -90,6 +90,8 @@ function setup() {
     canvas.addEventListener('click', fly);
 }
 
+// TODO: move into bird.js as bird.flap()
+// bird.vel = ... instead of bird.acc = ...
 function fly(e) {
     if (paused) return;
 
