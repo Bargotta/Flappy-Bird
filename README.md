@@ -20,6 +20,7 @@ Avoid the pipes and floor!
 #### Level Three (Complete)
 
 Pay attention to the moving pipes!
+
 <img src="img/screenshots/three.gif" width="350">
 
 #### Level Four (TODO)
