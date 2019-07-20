@@ -236,6 +236,11 @@ function showRestartMenu() {
     drawText("Restart", "#d5bb6b", x + 37, y + 29, 25, 5);
 
     canvas.addEventListener('click', restartGame);
+    document.body.onkeydown = function(e) {
+        if (e.keyCode == SPACE_BAR_KEY_CODE) {
+            reset();
+        }
+    }
 }
 
 function restartGame(e) {
@@ -252,6 +257,7 @@ function restartGame(e) {
 function reset() {
     clearInterval(interval);
     canvas.removeEventListener('click', restartGame);
+    document.body.onkeydown = null;
 
     frame = 0;
     score = 0;
