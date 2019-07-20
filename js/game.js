@@ -361,7 +361,3 @@ function degreesToRadians(degree) {
 function radiansToDegrees(radian) {
     return radian * 180 / Math.PI;
 }
-
-function pause() {
-
-}

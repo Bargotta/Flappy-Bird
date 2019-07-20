@@ -3,21 +3,19 @@ My own version of Flappy Bird! I originally just intended this to be a super sim
 
 **[See it in action.](https://bargotta.github.io/Flappy-Bird/)**
 
-### Levels
-
-#### Level One (Complete)
+#### Level One
 
 Avoid the pipes!
 
 <img src="img/screenshots/one.png" width="350">
 
-#### Level Two (Complete)
+#### Level Two
 
 Avoid the pipes and floor!
 
 <img src="img/screenshots/two.png" width="350">
 
-#### Level Three (Complete)
+#### Level Three
 
 Pay attention to the moving pipes!
 
