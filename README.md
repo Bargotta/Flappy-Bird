@@ -20,6 +20,7 @@ Each generation spawns 250 birds based on the previous generation, with generati
 
 <img src="img/screenshots/flappy-ai-spawn.gif" width="350">
 
+<img src="img/screenshots/flappy-ai-hiscore.gif" width="350">
 
 #### Level One
 Avoid the pipes!
