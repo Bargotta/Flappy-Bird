@@ -5,6 +5,8 @@ function Bird(x, y) {
     this.width = birdSize.width;
     this.height = birdSize.height;
 
+    this.brain = new NeuralNetwork(5, 8, 2);
+
     this.vel = 0;
     this.acc = 0;
     this.angle = 0;
@@ -20,6 +22,36 @@ function Bird(x, y) {
         this.image.src = "img/bird.png";
         ctx.drawImage(this.image, this.width / -2, this.height / -2);
         ctx.restore();
+    }
+
+    this.think = function() {
+        // find closest obstacle
+        let closest = null;
+        let closestD = Infinity;
+        for (let i = 0; i < obstacles.length; i++) {
+            let d = (obstacles[i].currX + obstacles[i].width) - this.x;
+            if (d > 0 && d < closestD) {
+                closest = i;
+                closestD = d;
+            }
+        }
+        console.log(closest);
+
+        let top = obstacles[closest];
+        let bottom = obstacles[closest + 1];
+
+        let inputs = [];
+        inputs[0] = this.y / canvas.height;
+        inputs[1] = (top.currY + top.height) / canvas.height;
+        inputs[2] = bottom.currY / canvas.height;
+        inputs[3] = top.currX / canvas.width;
+        inputs[4] = this.vel / 12;
+        console.log(inputs);
+
+        let output = this.brain.predict(inputs);
+        if (output[1] > output[0] && ! this.dead) {
+            this.flap();
+        }
     }
 
     this.update = function() {

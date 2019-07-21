@@ -13,6 +13,7 @@ var gameOver = false;
 var debug = false;
 var pauseEnabled = true;
 var paused = false;
+var playing = false; // is the user playing?
 
 // Parameters
 var hitboxCorrection = -4;
@@ -55,36 +56,49 @@ var restart = {
 };
 var SPACE_BAR_KEY_CODE = 32;
 var P_KEY_CODE = 80;
+var Q_KEY_CODE = 81;
+const TOTAL = 100;
 
 window.onload = function() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
 
+    document.body.onkeyup = function(e) {
+        // switch to genetic algorithm
+        if (e.keyCode == Q_KEY_CODE) {
+            playing = !playing;
+        }
+    }
+
     setup();
     interval = setInterval(game, frameRate * 1000);
 };
 
 function setup() {
-    bird = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
-
     frameRate = speeds[1].frameRate;
     flapAcceleration = speeds[1].flapAcceleration;
     flapAngle = speeds[1].flapAngle;
 
-    canvas.addEventListener('click', bird.flap);
-    document.body.onkeydown = function(e) {
-        if (e.keyCode == SPACE_BAR_KEY_CODE) {
-            bird.flap();
-        }
+    bird = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
+    if (playing) {
 
-        if (pauseEnabled && e.keyCode == P_KEY_CODE) {
-            if (paused) {
-                interval = setInterval(game, frameRate * 1000);
-                paused = false;
-            } else {
-                clearInterval(interval);
-                paused = true;
+        canvas.addEventListener('click', bird.flap);
+        document.body.onkeydown = function(e) {
+            // flap
+            if (e.keyCode == SPACE_BAR_KEY_CODE) {
+                bird.flap();
+            }
+
+            // pause
+            if (pauseEnabled && e.keyCode == P_KEY_CODE) {
+                if (paused) {
+                    interval = setInterval(game, frameRate * 1000);
+                    paused = false;
+                } else {
+                    clearInterval(interval);
+                    paused = true;
+                }
             }
         }
     }
@@ -116,14 +130,15 @@ function game() {
         if (! bird.dead) obstacles[i].update();
     }
     bird.update();
+    if (! playing) bird.think();
 
     // show
     for (var i = 0; i < obstacles.length; i++) {
         obstacles[i].show();
     }
-    bird.show();
     var center = (canvas.width / 2) - (20 * score.toString().length);
     drawText(score, "white", center, 90, 70, 8);
+    bird.show();
     addFloor(getLevel());
     var x = (canvas.width - 160) / 2;
     var y = canvas.height - 10;

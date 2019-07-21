@@ -3,7 +3,7 @@ function Obstacle(x, y, height, meta, isTopObstacle) {
     this.y = y;
     this.currX = x;
     this.currY = y;
-    this.width;
+    this.width = 84;
     this.height = height;
     this.meta = meta;
     this.isTopObstacle = isTopObstacle;
