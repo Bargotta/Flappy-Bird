@@ -196,6 +196,8 @@ function game() {
     drawText(score, "white", center, 90, 70, 8);
     if (! playing) {
         drawText("generation: " + generation, "white", 10, 25, 17, 5);
+        drawText("Alive: " + birds.length + "/250", "white", 10, 52, 17, 5);
+        drawText("Best: " + bestScore, "white", 10, 75, 17, 5);
     }
     for (var i = 0; i < birds.length; i++) {
         var bird = birds[i];
