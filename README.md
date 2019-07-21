@@ -1,7 +1,7 @@
 # Flappy Bird AI
 My own version of Flappy Bird... with an AI! I originally just intended this to be a super simplified version of the game, using this as a learning exercise in [Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API). However, I've since expanded on this project, which includes adding different levels and a neuroevolution artificial intelligence. I am very happy at how this has turned out!
 
-**[See it in action.](https://bargotta.github.io/Flappy-Bird/)**
+**[See it in action.](https://bargotta.github.io/Flappy-Bird-AI/)**
 
 ### Neuroevolution AI
 The neuroevolution AI was created using [tensorflow.js](https://www.tensorflow.org/js).
