@@ -233,7 +233,7 @@ function setLevel(level) {
             setLevelThree();
             break;
         default:
-            setLevelOne();
+            setLevelThree();
     }
 }
 
@@ -258,7 +258,7 @@ function setLevelThree() {
 }
 
 function addFloor(i) {
-    i = (i >= levels.length) ? 0 : i;
+    i = Math.min(i, 2);
     this.floor = new Image();
     this.floor.src = "img/levels/" + levels[i].img;
     var state = allBirdsDead ? 0 : frame % levels[i].frameRate
