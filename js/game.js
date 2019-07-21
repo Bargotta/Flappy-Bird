@@ -72,9 +72,10 @@ function setup() {
     flapAcceleration = speeds[1].flapAcceleration;
     flapAngle = speeds[1].flapAngle;
 
+    canvas.addEventListener('click', bird.flap);
     document.body.onkeydown = function(e) {
         if (e.keyCode == SPACE_BAR_KEY_CODE) {
-            fly(e);
+            bird.flap();
         }
 
         if (pauseEnabled && e.keyCode == P_KEY_CODE) {
@@ -87,17 +88,6 @@ function setup() {
             }
         }
     }
-    canvas.addEventListener('click', fly);
-}
-
-// TODO: move into bird.js as bird.flap()
-// bird.vel = ... instead of bird.acc = ...
-function fly(e) {
-    if (paused) return;
-
-    bird.acc = flapAcceleration;
-    if (bird.vel > 0) bird.vel = 0;
-    bird.angle = degreesToRadians(flapAngle);
 }
 
 function game() {
@@ -120,6 +110,13 @@ function game() {
         }
     }
 
+    // update
+    updateScore();
+    for (var i = 0; i < obstacles.length; i++) {
+        if (! bird.dead) obstacles[i].update();
+    }
+    bird.update();
+
     // show
     for (var i = 0; i < obstacles.length; i++) {
         obstacles[i].show();
@@ -132,13 +129,6 @@ function game() {
     var y = canvas.height - 10;
     drawText("Click or press spacebar to fly", "white", x, y, 17, 5)
     drawText("Aaron Bargotta", "white", 10, y, 13, 4)
-
-    // update
-    updateScore();
-    for (var i = 0; i < obstacles.length; i++) {
-        if (! bird.dead) obstacles[i].update();
-    }
-    bird.update();
 
     // Better luck next time...
     if (bird.dead) initiateGameOver();

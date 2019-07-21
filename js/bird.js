@@ -2,7 +2,6 @@ function Bird(x, y) {
     this.x = x;
     this.y = y;
 
-    // dimensions of bird.png
     this.width = birdSize.width;
     this.height = birdSize.height;
 
@@ -40,7 +39,15 @@ function Bird(x, y) {
     this.die = function() {
         this.dead = true;
         document.body.onkeydown = null;
-        canvas.removeEventListener('click', fly);
+        canvas.removeEventListener('click', this.flap);
+    }
+
+    this.flap = function() {
+        if (paused) return;
+
+        bird.acc = flapAcceleration;
+        if (bird.vel > 0) bird.vel = 0;
+        bird.angle = degreesToRadians(flapAngle);
     }
 
     this.hitFloor = function() {
