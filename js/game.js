@@ -7,18 +7,24 @@ var interval;
 var frame = 0;
 var score = 0;
 var bestScore = 0;
-var bird;
+var birds = [];
+var savedBirds = [];
 var obstacles = [];
 var gameOver = false;
 var debug = false;
 var pauseEnabled = true;
 var paused = false;
 var playing = false; // is the user playing?
+var allBirdsDead = false;
+var allBirdsOnFloor = false;
+var generation = 0;
+var slider;
+var autoRestart = true;
 
 // Parameters
 var hitboxCorrection = -4;
 var floorHeight = 60;
-var obstacleSpawn = 750; // Location where obstacles are created
+var obstacleSpawn = 550; // Location where obstacles are created
 var obstacleSpacing = 370; // horizontal spacing between obstacle pairs
 var maxGap = 200; // max distance between an obstacle pair
 var minGapFactor = 3; // gap must be a minimum of minGapFactor * bird.height
@@ -57,17 +63,20 @@ var restart = {
 var SPACE_BAR_KEY_CODE = 32;
 var P_KEY_CODE = 80;
 var Q_KEY_CODE = 81;
-const TOTAL = 100;
+const TOTAL = 250;
 
 window.onload = function() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
+    tf.setBackend('cpu');
+    slider = createSlider(1, 10, 1);
 
     document.body.onkeyup = function(e) {
         // switch to genetic algorithm
         if (e.keyCode == Q_KEY_CODE) {
             playing = !playing;
+            generation = 0;
         }
     }
 
@@ -80,14 +89,24 @@ function setup() {
     flapAcceleration = speeds[1].flapAcceleration;
     flapAngle = speeds[1].flapAngle;
 
-    bird = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
-    if (playing) {
+    var count = playing ? 1 : TOTAL;
+    for (let i = 0; i < count; i++) {
+        birds[i] = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
+    }
 
-        canvas.addEventListener('click', bird.flap);
+
+    if (playing) {
+        for (var i = 0; i < birds.length; i++) {
+            var bird = birds[i];
+            canvas.addEventListener('click', bird.flap);
+        }
         document.body.onkeydown = function(e) {
             // flap
             if (e.keyCode == SPACE_BAR_KEY_CODE) {
-                bird.flap();
+                for (var i = 0; i < birds.length; i++) {
+                    var bird = birds[i];
+                    bird.flap();
+                }
             }
 
             // pause
@@ -105,32 +124,69 @@ function setup() {
 }
 
 function game() {
-    clearScreen();
+    for (let n = 0; n < slider.value(); n++) {
 
-    // create new obstacles after a certain amount of frames
-    if (frame % obstacleSpacing == 0) {
-        createObstaclePair(obstacleSpawn);
-    }
 
-    // remove obstacle pair if it's off screen
-    if (obstacles[0].currX < -obstacles[0].width && obstacles[1].currX < -obstacles[1].width) {
-        obstacles = obstacles.slice(2);
-    }
+        clearScreen();
 
-    // detect collision
-    for (var i = 0; i < obstacles.length; i++) {    
-        if (collisionWith(obstacles[i])) {
-            bird.die();
+        allBirdsDead = true;
+        for (var i = 0; i < birds.length; i++) {
+            var bird = birds[i];
+            if (! bird.dead) allBirdsDead = false;
         }
-    }
 
-    // update
-    updateScore();
-    for (var i = 0; i < obstacles.length; i++) {
-        if (! bird.dead) obstacles[i].update();
+        // create new obstacles after a certain amount of frames
+        if (frame % obstacleSpacing == 0) {
+            createObstaclePair(obstacleSpawn);
+        }
+
+        // remove obstacle pair if it's off screen
+        if (obstacles[0].currX < -obstacles[0].width && obstacles[1].currX < -obstacles[1].width) {
+            obstacles = obstacles.slice(2);
+        }
+
+        // detect collision
+        for (var i = 0; i < obstacles.length; i++) {
+            for (var j = birds.length - 1; j >= 0; j--) {
+                var bird = birds[j];
+                if (collisionWith(bird, obstacles[i])) {
+                    bird.die();
+                    if (! playing) {
+                        savedBirds.push(birds.splice(j, 1)[0]);
+                    }
+                }
+            }
+        }
+
+        // update
+        for (var i = 0; i < birds.length; i++) {
+            var bird = birds[i];
+            updateScore(bird);
+        }
+        for (var i = 0; i < obstacles.length; i++) {
+            if (! allBirdsDead) obstacles[i].update();
+        }
+        for (var i = 0; i < birds.length; i++) {
+            var bird = birds[i];
+            bird.update();
+            if (! playing && frame % 10 == 0) {
+                bird.think();
+            }
+        }
+
+        // Better luck next time...
+        if (allBirdsDead) initiateGameOver();
+        if (gameOver) {
+            if (autoRestart) {
+                reset();
+                return;
+            } else {
+                showRestartMenu();
+            }
+        }
+
+        frame++;
     }
-    bird.update();
-    if (! playing) bird.think();
 
     // show
     for (var i = 0; i < obstacles.length; i++) {
@@ -138,18 +194,18 @@ function game() {
     }
     var center = (canvas.width / 2) - (20 * score.toString().length);
     drawText(score, "white", center, 90, 70, 8);
-    bird.show();
+    if (! playing) {
+        drawText("generation: " + generation, "white", 10, 25, 17, 5);
+    }
+    for (var i = 0; i < birds.length; i++) {
+        var bird = birds[i];
+        bird.show();
+    }
     addFloor(getLevel());
     var x = (canvas.width - 160) / 2;
     var y = canvas.height - 10;
     drawText("Click or press spacebar to fly", "white", x, y, 17, 5)
     drawText("Aaron Bargotta", "white", 10, y, 13, 4)
-
-    // Better luck next time...
-    if (bird.dead) initiateGameOver();
-    if (gameOver) showRestartMenu();
-
-    frame++;
 }
 
 /**************************************************
@@ -188,9 +244,9 @@ function setLevelTwo() {
     ctx.fillStyle = levels[1].background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (bird.onFloor) {
-        initiateGameOver();
-    }
+    // if (bird.onFloor) {
+    //     initiateGameOver();
+    // }
 }
 
 function setLevelThree() {
@@ -205,15 +261,17 @@ function addFloor(i) {
     i = (i >= levels.length) ? 0 : i;
     this.floor = new Image();
     this.floor.src = "img/levels/" + levels[i].img;
-    var state = bird.dead ? 0 : (frame % levels[i].frameRate);
+    var state = allBirdsDead ? 0 : frame % levels[i].frameRate
     ctx.drawImage(this.floor, -state, canvas.height - floor.height);
 }
 
 function initiateGameOver() {
-    bird.die();
-
-    // Game Over...
-    if (bird.dead && bird.onFloor) {
+    allBirdsOnFloor = true;
+    for (var i = 0; i < birds.length; i++) {
+        var bird = birds[i];
+        if (! bird.onFloor) allBirdsOnFloor = false;
+    }
+    if (allBirdsDead && allBirdsOnFloor) {
         clearInterval(interval);
         bestScore = Math.max(bestScore, score);
         gameOver = true;
@@ -270,31 +328,39 @@ function reset() {
     frame = 0;
     score = 0;
     gameOver = false;
+    allBirdsDead = false;
+    allBirdsOnFloor = false;
     obstacles = [];
+    birds = [];
 
-    setup();
+    if (playing) {
+        setup();
+    } else {
+        generation++;
+        nextGeneration();
+    }
     interval = setInterval(game, frameRate * 1000);
 }
 
-function updateScore() {
+function updateScore(bird) {
     for (var i = 0; i < obstacles.length; i++) {
         var obstacle = obstacles[i];
-        if (! obstacle.completed && completed(obstacle)) {
+        if (! obstacle.completed && completed(bird, obstacle)) {
             obstacle.completed = true;
             score += 0.5; // avoid double counting since obstacles come in pairs
         }
     }
 }
 
-function completed(obstacle) {
+function completed(bird, obstacle) {
     return bird.x > obstacle.currX + obstacle.width;
 }
 
 function createObstaclePair(x) {
-    var maxTopObstacleHeight = canvas.height - (minGapFactor * bird.height + floorHeight);
+    var maxTopObstacleHeight = canvas.height - (minGapFactor * birdSize.height + floorHeight);
     var topObstacleHeight = Math.round(Math.random() * maxTopObstacleHeight);
 
-    var obstacleGap = (minGapFactor * bird.height) + Math.round(Math.random() * maxGap);
+    var obstacleGap = (minGapFactor * birdSize.height) + Math.round(Math.random() * maxGap);
     obstacleGap = Math.min(obstacleGap, canvas.height - (topObstacleHeight + floorHeight))
     var bottomObstacleHeight = canvas.height - (topObstacleHeight + obstacleGap + floorHeight);
 
@@ -312,7 +378,7 @@ function createObstaclePair(x) {
     obstacles.push(bottomObstacle);
 }
 
-function collisionWith(obstacle) {
+function collisionWith(bird, obstacle) {
     var bLeft = bird.x;
     var bRight = bird.x + bird.width + hitboxCorrection;
     var bTop = bird.y;

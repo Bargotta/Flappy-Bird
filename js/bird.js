@@ -1,17 +1,31 @@
-function Bird(x, y) {
+function Bird(x, y, brain) {
     this.x = x;
     this.y = y;
 
     this.width = birdSize.width;
     this.height = birdSize.height;
 
-    this.brain = new NeuralNetwork(5, 8, 2);
-
     this.vel = 0;
     this.acc = 0;
     this.angle = 0;
     this.dead = false;
     this.onFloor = false;
+    this.score = 0;
+    this.fitness = 0;
+
+    if (brain) {
+        this.brain = brain.copy()
+    } else {
+        this.brain = new NeuralNetwork(5, 8, 2);
+    }
+
+    this.dispose = function() {
+        this.brain.dispose();
+    }
+
+    this.mutate = function() {
+        this.brain.mutate(0.1);
+    }
 
     this.show = function() {
         ctx.save();
@@ -35,7 +49,6 @@ function Bird(x, y) {
                 closestD = d;
             }
         }
-        console.log(closest);
 
         let top = obstacles[closest];
         let bottom = obstacles[closest + 1];
@@ -46,15 +59,16 @@ function Bird(x, y) {
         inputs[2] = bottom.currY / canvas.height;
         inputs[3] = top.currX / canvas.width;
         inputs[4] = this.vel / 12;
-        console.log(inputs);
 
         let output = this.brain.predict(inputs);
-        if (output[1] > output[0] && ! this.dead) {
+        if (output[0] > output[1] && ! this.dead) {
             this.flap();
         }
     }
 
     this.update = function() {
+        this.score++;
+
         this.acc = Math.max(this.acc, flapAcceleration * 1.25);
         this.vel += (this.acc + gravity) * frameRate;
         this.y += this.vel * frameRate * 100;
@@ -77,9 +91,9 @@ function Bird(x, y) {
     this.flap = function() {
         if (paused) return;
 
-        bird.acc = flapAcceleration;
-        if (bird.vel > 0) bird.vel = 0;
-        bird.angle = degreesToRadians(flapAngle);
+        this.acc = flapAcceleration;
+        if (this.vel > 0) this.vel = 0;
+        this.angle = degreesToRadians(flapAngle);
     }
 
     this.hitFloor = function() {
