@@ -1,6 +1,6 @@
-function Bird(x, y, brain) {
-    this.x = x;
-    this.y = y;
+function Bird(brain) {
+    this.y = (canvas.height - birdSize.height) / 2;
+    this.x = (canvas.width - birdSize.width) / 2;
 
     this.width = birdSize.width;
     this.height = birdSize.height;
@@ -50,6 +50,7 @@ function Bird(x, y, brain) {
             }
         }
 
+        // TODO: check these are getting set correctly
         let top = obstacles[closest];
         let bottom = obstacles[closest + 1];
 

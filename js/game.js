@@ -4,6 +4,7 @@
 var canvas;
 var ctx;
 var interval;
+var slider;
 var frame = 0;
 var score = 0;
 var bestScore = 0;
@@ -11,23 +12,21 @@ var birds = [];
 var savedBirds = [];
 var obstacles = [];
 var gameOver = false;
-var debug = false;
 var pauseEnabled = true;
 var paused = false;
-var playing = false; // is the user playing?
 var allBirdsDead = false;
 var allBirdsOnFloor = false;
 var generation = 0;
-var slider;
-var autoRestart = true;
+var debug = false;
+var playing = false; // is the user playing?
 
 // Parameters
 var hitboxCorrection = -4;
 var floorHeight = 60;
 var obstacleSpawn = 550; // Location where obstacles are created
 var obstacleSpacing = 370; // horizontal spacing between obstacle pairs
-var maxGap = 200; // max distance between an obstacle pair
-var minGapFactor = 3; // gap must be a minimum of minGapFactor * bird.height
+var maxGap = 0; // max distance between an obstacle pair
+var minGapFactor = 4; // gap must be a minimum of minGapFactor * bird.height
 var gravity = 9.81;
 var decay = 0.75;
 
@@ -46,7 +45,6 @@ var speeds = [
         flapAngle: -35
     }
 ];
-
 var birdSize = { width: 51, height: 36 };
 var scoreboard = { x: -150, y: -300, width: 150, height: 180 };
 var levels = [
@@ -60,23 +58,38 @@ var restart = {
     width: scoreboard.width,
     height: 40
 };
-var SPACE_BAR_KEY_CODE = 32;
+
+var SPACEBAR_KEY_CODE = 32;
 var P_KEY_CODE = 80;
 var Q_KEY_CODE = 81;
-const TOTAL = 250;
+var POPULATION_SIZE = 250;
 
 window.onload = function() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
     tf.setBackend('cpu');
-    slider = createSlider(1, 10, 1);
+    slider = createSlider(1, 3, 1);
 
     document.body.onkeyup = function(e) {
         // switch to genetic algorithm
         if (e.keyCode == Q_KEY_CODE) {
-            playing = !playing;
-            generation = 0;
+            if (! playing) {            
+                playing = true;
+                generation = 0;
+                reset();
+            }
+        }
+
+        // pause
+        if (pauseEnabled && e.keyCode == P_KEY_CODE) {
+            if (paused) {
+                interval = setInterval(game, frameRate * 1000);
+                paused = false;
+            } else {
+                clearInterval(interval);
+                paused = true;
+            }
         }
     }
 
@@ -85,38 +98,25 @@ window.onload = function() {
 };
 
 function setup() {
-    frameRate = speeds[1].frameRate;
-    flapAcceleration = speeds[1].flapAcceleration;
-    flapAngle = speeds[1].flapAngle;
+    // set speed
+    var speed = speeds[1];
+    frameRate = speed.frameRate;
+    flapAcceleration = speed.flapAcceleration;
+    flapAngle = speed.flapAngle;
 
-    var count = playing ? 1 : TOTAL;
-    for (let i = 0; i < count; i++) {
-        birds[i] = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2);
+    // create bird population
+    var pop_size = playing ? 1 : POPULATION_SIZE;
+    for (let i = 0; i < pop_size; i++) {
+        birds[i] = new Bird();
     }
 
-
     if (playing) {
-        for (var i = 0; i < birds.length; i++) {
-            var bird = birds[i];
-            canvas.addEventListener('click', bird.flap);
-        }
         document.body.onkeydown = function(e) {
-            // flap
-            if (e.keyCode == SPACE_BAR_KEY_CODE) {
+            // flap on spacebar
+            if (e.keyCode == SPACEBAR_KEY_CODE) {
                 for (var i = 0; i < birds.length; i++) {
                     var bird = birds[i];
                     bird.flap();
-                }
-            }
-
-            // pause
-            if (pauseEnabled && e.keyCode == P_KEY_CODE) {
-                if (paused) {
-                    interval = setInterval(game, frameRate * 1000);
-                    paused = false;
-                } else {
-                    clearInterval(interval);
-                    paused = true;
                 }
             }
         }
@@ -125,8 +125,6 @@ function setup() {
 
 function game() {
     for (let n = 0; n < slider.value(); n++) {
-
-
         clearScreen();
 
         allBirdsDead = true;
@@ -141,6 +139,7 @@ function game() {
         }
 
         // remove obstacle pair if it's off screen
+        // TODO: Make sure obstacles are being removed correctly
         if (obstacles[0].currX < -obstacles[0].width && obstacles[1].currX < -obstacles[1].width) {
             obstacles = obstacles.slice(2);
         }
@@ -160,8 +159,7 @@ function game() {
 
         // update
         for (var i = 0; i < birds.length; i++) {
-            var bird = birds[i];
-            updateScore(bird);
+            updateScore(birds[i]);
         }
         for (var i = 0; i < obstacles.length; i++) {
             if (! allBirdsDead) obstacles[i].update();
@@ -176,13 +174,9 @@ function game() {
 
         // Better luck next time...
         if (allBirdsDead) initiateGameOver();
-        if (gameOver) {
-            if (autoRestart) {
-                reset();
-                return;
-            } else {
-                showRestartMenu();
-            }
+        if (gameOver && ! playing) {
+            reset();
+            return;
         }
 
         frame++;
@@ -192,22 +186,28 @@ function game() {
     for (var i = 0; i < obstacles.length; i++) {
         obstacles[i].show();
     }
-    var center = (canvas.width / 2) - (20 * score.toString().length);
-    drawText(score, "white", center, 90, 70, 8);
+    addFloor(getLevel());
+    var x = (canvas.width - 130) / 2;
+    var y = canvas.height - 10;
+    drawText("Aaron Bargotta", "white", 10, y, 13, 4)
+    var scoreCenter = (canvas.width / 2) - (20 * score.toString().length);
+    drawText(score, "white", scoreCenter, 90, 70, 8);
+    drawText("Press P to pause", "white", canvas.width - 135, 25, 17, 5);
+    // Genetic Algorithm stats
     if (! playing) {
         drawText("generation: " + generation, "white", 10, 25, 17, 5);
-        drawText("Alive: " + birds.length + "/250", "white", 10, 52, 17, 5);
+        drawText("Alive: " + birds.length + "/" + POPULATION_SIZE, "white", 10, 52, 17, 5);
         drawText("Best: " + bestScore, "white", 10, 75, 17, 5);
+        drawText("Press Q to play", "white", canvas.width - 135, 52, 17, 5);
+    } else {
+        drawText("Press spacebar to fly", "white", x, y, 17, 5)
     }
     for (var i = 0; i < birds.length; i++) {
-        var bird = birds[i];
-        bird.show();
+        birds[i].show();
     }
-    addFloor(getLevel());
-    var x = (canvas.width - 160) / 2;
-    var y = canvas.height - 10;
-    drawText("Click or press spacebar to fly", "white", x, y, 17, 5)
-    drawText("Aaron Bargotta", "white", 10, y, 13, 4)
+    if (gameOver && playing) {
+        showRestartMenu();
+    }
 }
 
 /**************************************************
@@ -246,9 +246,7 @@ function setLevelTwo() {
     ctx.fillStyle = levels[1].background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // if (bird.onFloor) {
-    //     initiateGameOver();
-    // }
+    // TODO: Die if floor is touched
 }
 
 function setLevelThree() {
@@ -305,7 +303,7 @@ function showRestartMenu() {
 
     canvas.addEventListener('click', restartGame);
     document.body.onkeydown = function(e) {
-        if (e.keyCode == SPACE_BAR_KEY_CODE) {
+        if (e.keyCode == SPACEBAR_KEY_CODE) {
             reset();
         }
     }

@@ -1,10 +1,10 @@
 function nextGeneration() {
   console.log('next generation');
   calculateFitness();
-  for (let i = 0; i < TOTAL; i++) {
+  for (let i = 0; i < POPULATION_SIZE; i++) {
     birds[i] = pickOne();
   }
-  for (let i = 0; i < TOTAL; i++) {
+  for (let i = 0; i < POPULATION_SIZE; i++) {
     savedBirds[i].dispose();
   }
   savedBirds = [];
@@ -19,7 +19,7 @@ function pickOne() {
   }
   index--;
   let bird = savedBirds[index];
-  let child = new Bird((canvas.width - birdSize.width) / 2, (canvas.height - birdSize.height) / 2, bird.brain);
+  let child = new Bird(bird.brain);
   child.mutate();
   return child;
 }
