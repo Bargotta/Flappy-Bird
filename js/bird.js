@@ -12,6 +12,7 @@ function Bird(brain) {
     this.onFloor = false;
     this.score = 0;
     this.fitness = 0;
+    this.level = 0;
 
     if (brain) {
         this.brain = brain.copy()
@@ -81,12 +82,15 @@ function Bird(brain) {
 
         this.onFloor = this.hitFloor();
         this.hitCeil();
+
+        if (this.onFloor && this.level > 0) {
+            this.die();
+        }
     }
 
     this.die = function() {
         this.dead = true;
         document.body.onkeydown = null;
-        canvas.removeEventListener('click', this.flap);
     }
 
     this.flap = function() {

@@ -1,5 +1,4 @@
 function nextGeneration() {
-  console.log('next generation');
   calculateFitness();
   for (let i = 0; i < POPULATION_SIZE; i++) {
     birds[i] = pickOne();

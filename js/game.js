@@ -144,11 +144,11 @@ function game() {
             obstacles = obstacles.slice(2);
         }
 
-        // detect collision
+        // detect collision and remove dead birds
         for (var i = 0; i < obstacles.length; i++) {
             for (var j = birds.length - 1; j >= 0; j--) {
                 var bird = birds[j];
-                if (collisionWith(bird, obstacles[i])) {
+                if (bird.dead  || collisionWith(bird, obstacles[i])) {
                     bird.die();
                     if (! playing) {
                         savedBirds.push(birds.splice(j, 1)[0]);
@@ -159,7 +159,9 @@ function game() {
 
         // update
         for (var i = 0; i < birds.length; i++) {
-            updateScore(birds[i]);
+            var bird = birds[i];
+            updateScore(bird);
+            bird.level = getLevel();
         }
         for (var i = 0; i < obstacles.length; i++) {
             if (! allBirdsDead) obstacles[i].update();
