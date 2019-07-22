@@ -6,7 +6,7 @@ var ctx;
 var interval;
 var slider;
 var frame = 0;
-var score = 38;
+var score = 0;
 var bestScore = 0;
 var birds = [];
 var savedBirds = [];
@@ -329,7 +329,7 @@ function reset() {
     document.body.onkeydown = null;
 
     frame = 0;
-    score = 38;
+    score = 0;
     gameOver = false;
     allBirdsDead = false;
     allBirdsOnFloor = false;
