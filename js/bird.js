@@ -17,7 +17,7 @@ function Bird(brain) {
     if (brain) {
         this.brain = brain.copy()
     } else {
-        this.brain = new NeuralNetwork(5, 8, 2);
+        this.brain = new NeuralNetwork(6, 8, 2);
     }
 
     this.dispose = function() {
@@ -61,6 +61,7 @@ function Bird(brain) {
         inputs[2] = bottom.currY / canvas.height;
         inputs[3] = top.currX / canvas.width;
         inputs[4] = this.vel / 12;
+        inputs[5] = ((top.vel / obstacleSpeed) / 2) + 0.5;
 
         let output = this.brain.predict(inputs);
         if (output[0] > output[1] && ! this.dead) {
