@@ -29,6 +29,7 @@ var maxGap = 0; // max distance between an obstacle pair
 var minGapFactor = 4; // gap must be a minimum of minGapFactor * bird.height
 var gravity = 9.81;
 var decay = 0.75;
+var obstacleSpeed = 0.5;
 
 var frameRate;
 var flapAcceleration;

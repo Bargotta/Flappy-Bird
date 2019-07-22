@@ -10,7 +10,7 @@ function Obstacle(x, y, height, meta, isTopObstacle) {
 
     this.completed = false;
     this.oscillate = false;
-    this.movingDown = false;
+    this.vel = 0;
     this.image = new Image();
 
     this.show = function() {
@@ -40,21 +40,21 @@ function Obstacle(x, y, height, meta, isTopObstacle) {
                 var top = 0;
                 var bottom = this.meta.canvas.height - (this.meta.floorHeight + this.meta.gap);
                 var oscillatingPoint = this.currY + this.height;
-                this.setDirection(oscillatingPoint, top, bottom);
+                this.setVelocity(oscillatingPoint, top, bottom);
             } else {
                 var top = this.meta.gap;
                 var bottom = this.meta.canvas.height - this.meta.floorHeight;
                 var oscillatingPoint = this.currY;
-                this.setDirection(oscillatingPoint, top, bottom);
+                this.setVelocity(oscillatingPoint, top, bottom);
             }
 
-            if (this.movingDown) this.currY += 0.5;
-            else this.currY -= 0.5;
+            if (this.vel == 0) this.vel = obstacleSpeed; // initially move down
+            this.currY += this.vel;
         }
     };
 
-    this.setDirection = function(oscillatingPoint, top, bottom) {
-        if (oscillatingPoint <= top) this.movingDown = true;
-        if (oscillatingPoint >= bottom) this.movingDown = false;
+    this.setVelocity = function(oscillatingPoint, top, bottom) {
+        if (oscillatingPoint <= top) this.vel = obstacleSpeed;
+        if (oscillatingPoint >= bottom) this.vel = -obstacleSpeed;
     };
 }
