@@ -71,10 +71,8 @@ function Bird(brain) {
     this.update = function() {
         this.score++;
 
-        this.acc = Math.max(this.acc, flapAcceleration * 1.25);
-        this.vel += (this.acc + gravity) * frameRate;
+        this.vel += gravity * frameRate;
         this.y += this.vel * frameRate * 100;
-        this.acc = Math.min(0, this.acc + decay);
 
         if (this.vel > 0 && radiansToDegrees(this.angle) < 90) {
             this.angle += degreesToRadians(1);
@@ -96,8 +94,7 @@ function Bird(brain) {
     this.flap = function() {
         if (paused) return;
 
-        this.acc = flapAcceleration;
-        if (this.vel > 0) this.vel = 0;
+        this.vel = -3.5;
         this.angle = degreesToRadians(flapAngle);
     }
 
