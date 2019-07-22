@@ -6,7 +6,7 @@ var ctx;
 var interval;
 var slider;
 var frame = 0;
-var score = 0;
+var score = 38;
 var bestScore = 0;
 var birds = [];
 var savedBirds = [];
@@ -30,6 +30,7 @@ var minGapFactor = 4; // gap must be a minimum of minGapFactor * bird.height
 var gravity = 9.81;
 var decay = 0.75;
 var obstacleSpeed = 0.5;
+var thinkDelay = 5;
 
 var frameRate;
 var flapAcceleration;
@@ -70,7 +71,7 @@ window.onload = function() {
     ctx = canvas.getContext('2d');
     document.body.appendChild(canvas);
     tf.setBackend('cpu');
-    slider = createSlider(1, 3, 1);
+    slider = createSlider(1, 25, 1);
 
     document.body.onkeyup = function(e) {
         // switch to genetic algorithm
@@ -170,7 +171,7 @@ function game() {
         for (var i = 0; i < birds.length; i++) {
             var bird = birds[i];
             bird.update();
-            if (! playing && frame % 10 == 0) {
+            if (! playing && frame % thinkDelay == 0) {
                 bird.think();
             }
         }
@@ -200,7 +201,8 @@ function game() {
     if (! playing) {
         drawText("generation: " + generation, "white", 10, 25, 17, 5);
         drawText("Alive: " + birds.length + "/" + POPULATION_SIZE, "white", 10, 52, 17, 5);
-        drawText("Best: " + bestScore, "white", 10, 75, 17, 5);
+        drawText("Best: " + bestScore, "white", 10, 77, 17, 5);
+        drawText("Speed: x" + slider.value(), "white", 10, 100, 17, 5);
         drawText("Press Q to play", "white", canvas.width - 135, 52, 17, 5);
     } else {
         drawText("Press spacebar to fly", "white", x, y, 17, 5)
@@ -248,8 +250,6 @@ function setLevelOne() {
 function setLevelTwo() {
     ctx.fillStyle = levels[1].background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // TODO: Die if floor is touched
 }
 
 function setLevelThree() {
@@ -329,7 +329,7 @@ function reset() {
     document.body.onkeydown = null;
 
     frame = 0;
-    score = 0;
+    score = 38;
     gameOver = false;
     allBirdsDead = false;
     allBirdsOnFloor = false;
